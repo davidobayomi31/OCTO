@@ -169,6 +169,18 @@ makeSphere(.47, shellMat, V(0, -.24, spiderZ + .17), [.74, 1.08, .33], spider);
 const rim = new THREE.Mesh(new THREE.TorusGeometry(.36, .018, 8, 56), new THREE.MeshStandardMaterial({color:0xf2dc7d, metalness:.1, roughness:.4})); rim.position.set(0, -.24, spiderZ + .28); spider.add(rim);
 const markMat = new THREE.MeshBasicMaterial({color:0x2a3530});
 for (let m = 0; m < 5; m++) makeSphere(.025, markMat, V((m - 2) * .105, -.28, spiderZ + .49), [1,1,1], spider);
+// Eight smaller spiders, one for each leg. They burst out of the big one mid-walk and race it into the lair.
+// Clones share the big spider's geometry and materials, so they cost very little to add.
+const babies = Array.from({length:8}, (_, i) => {
+  const g = spider.clone(true); g.visible = false; world.add(g);
+  return {g, legs:g.children.filter(c => c.isGroup), a:legAngles[i],
+    born:.16 + i * .028,                                  // when it pops out of the big spider
+    home:.56 + i * .03,                                   // when it reaches the lair's mouth
+    arc:(i % 2 ? -1 : 1) * (.9 + (i % 4) * .4),           // how wide it swings above or below the big one
+    marc:[3.4, 1.7, 4.6, -1.3, 2.6, 5.3, -.9, 3.9][i],   // phone: mostly upward, into the space the intro text leaves
+    size:.36 + (i % 3) * .04};
+});
+const easeOutBack = x => 1 + 2.70158 * Math.pow(x - 1, 3) + 1.70158 * Math.pow(x - 1, 2);
 
 // The spider's lair: a silk funnel web. A sheet of threads around a mouth that curves
 // away into the board, lit warm from deep inside. The spider walks here and goes in.
@@ -301,33 +313,6 @@ canvas.addEventListener('pointerleave', () => { if (!down) { setHover(-1); canva
 let W = 1, H = 1, baseZ = 10.4, walk = 0, homeX = 13;
 const homeHud = $('home-hud');
 
-/* ---------- Disposable-camera photos magneted to the board along the spider's walk ---------- */
-// Placeholder stock photos (Unsplash) until the team has real ones. Swap the photo ids for real images.
-// x, y: where on the board (world units), mx, my: the same on phones; at: how far through the walk the photo is pinned up.
-const pinData = [
-  {img:'photo-1456324504439-367cee3b3c32', cap:'day 1. wrote it down.', date:"'26 10 01", x:2.6, y:2.45, mx:1.8, my:5.6, at:.12, r:-5},
-  {img:'photo-1621255457330-7ef4e88ec27f', cap:'first roleplay. nervous.', date:"'26 10 06", x:4.3, y:-2.8, mx:3.4, my:9.0, at:.22, r:4},
-  {img:'photo-1455390582262-044cdead277a', cap:'script v4', date:"'26 10 13", x:5.9, y:2.6, mx:5.0, my:5.6, at:.32, r:-3},
-  {img:'photo-1603464021578-f327592a89de', cap:'office today', date:"'26 10 21", x:7.5, y:-2.9, mx:6.6, my:9.0, at:.42, r:6},
-  {img:'photo-1588873281272-14886ba1f737', cap:'thursday live call', date:"'26 10 29", x:8.5, y:2.55, mx:8.0, my:5.6, at:.5, r:-4}
-];
-const pinHost = $('pins');
-const pins = pinData.map(d => {
-  const f = document.createElement('figure'); f.className = 'pin';
-  f.innerHTML = `<span class="magnet"></span><div class="ph"><img src="https://images.unsplash.com/${d.img}?w=420&h=420&fit=crop&q=70" alt="" loading="lazy" decoding="async"><span class="stamp">${d.date}</span></div><figcaption>${d.cap}</figcaption>`;
-  pinHost.append(f); return {el:f, ...d};
-});
-function placePins(camX, camY, pxPerUnit){
-  const mob = isMobile(), gone = THREE.MathUtils.smoothstep(walk, .8, .9);
-  pins.forEach(p => {
-    const k = THREE.MathUtils.smoothstep(walk, p.at, p.at + .07);
-    const op = k * (1 - gone);
-    p.el.style.opacity = op.toFixed(3);
-    if (op < .005) return;
-    const sx = W / 2 + ((mob ? p.mx : p.x) - camX) * pxPerUnit, sy = H / 2 - ((mob ? p.my : p.y) - camY) * pxPerUnit;
-    p.el.style.transform = `translate3d(${sx.toFixed(1)}px, ${sy.toFixed(1)}px, 0) translate(-50%, -50%) rotate(${(p.r + (1 - k) * 9).toFixed(2)}deg) scale(${(1 + (1 - k) * .14).toFixed(3)})`;
-  });
-}
 function resize(){
   W = stage.clientWidth; H = stage.clientHeight;
   camera.aspect = W / H; camera.updateProjectionMatrix(); renderer.setSize(W, H, false);
@@ -374,8 +359,29 @@ function render(time = 0){
   const moving = Math.abs(target - walk) > .002 && walk > .08 && walk < .97;
   legGroups.forEach((g, i) => { g.rotation.z = moving ? Math.sin(time * .02 + (i % 2) * Math.PI) * .14 : g.rotation.z * .85; });
   if (moving && e === 0) spider.position.z += Math.abs(Math.sin(time * .02)) * .06;
-  lairGlow.material.opacity = .45 + e * .55 + Math.sin(time * .002) * .05;
-  lairLight.intensity = 5 + e * 14;
+
+  // The eight small spiders: pop out of the big one, fan out across the board, then file into the lair.
+  const bigAt = w => { const uu = ss(w, .1, .8); return [homeX * uu, Math.sin(uu * Math.PI) * .9]; };
+  let inside = 0;
+  babies.forEach((b, i) => {
+    const born = clamp01((walk - b.born) / .05);
+    if (born <= 0) { b.g.visible = false; return; }
+    const [sx, sy] = bigAt(b.born), mx = homeX + Math.cos(b.a) * .45, my = Math.sin(b.a) * .45;
+    const pos = t => {
+      const q = ss(t, 0, 1), burst = Math.sin(Math.min(1, t * 2.4) * Math.PI / 2) * (1 - q);
+      return [sx + (mx - sx) * q + Math.cos(b.a) * 2 * burst, sy + (my - sy) * q + Math.sin(b.a) * 1.7 * burst + Math.sin(q * Math.PI) * (isMobile() ? b.marc : b.arc)];
+    };
+    const p = clamp01((walk - b.born) / (b.home - b.born)), [x, y] = pos(p), [x2, y2] = pos(Math.min(1, p + .02));
+    const ent = clamp01((walk - b.home) / .07);
+    inside += ent;
+    b.g.position.set(x, y, .35 * (1 - ss(p, 0, .3))).addScaledVector(lairAxis, ent * 3.2);
+    if (Math.abs(x2 - x) + Math.abs(y2 - y) > 1e-4) b.g.rotation.z = Math.atan2(y2 - y, x2 - x) - Math.PI / 2;
+    b.g.scale.setScalar(b.size * (born < 1 ? Math.max(.01, easeOutBack(born)) : 1) * (1 - ent * .7));
+    b.g.visible = ent < .97;
+    b.legs.forEach((g, k) => { g.rotation.z = moving ? Math.sin(time * .03 + i + (k % 2) * Math.PI) * .18 : g.rotation.z * .85; });
+  });
+  lairGlow.material.opacity = .4 + inside / 8 * .3 + e * .4 + Math.sin(time * .002) * .05;
+  lairLight.intensity = 5 + inside * 1.2 + e * 10;
   homeHud.style.opacity = ss(walk, .84, .98);
   homeHud.style.visibility = walk > .82 ? 'visible' : 'hidden';
   homeHud.style.translate = `${(1 - ss(walk, .84, .98)) * 30}px 0`;
@@ -389,7 +395,6 @@ function render(time = 0){
   // slide the chalk smudges with the board so it reads as one surface moving
   const pxPerUnit = H / (2 * baseZ * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
   stage.style.setProperty('--pan', `${-homeX * camU * pxPerUnit}px`);
-  placePins(camX, shiftY, pxPerUnit);
   nodes.forEach(({mat, halo}, i) => {
     const on = i === hovered ? 1 : 0;
     mat.emissiveIntensity += (on * .35 - mat.emissiveIntensity) * .15;
@@ -411,7 +416,8 @@ function render(time = 0){
 /* ---------- The tiny chalk spider crawling across the board below the hero ---------- */
 const crawl = $('crawl'), crawler = $('crawler'), trail = $('trail-path'), crawlSvg = $('crawl-trail');
 let y0 = 0, yEnd = 0, docW = 0, amp = 0, wave = 380, walkTimer = 0;
-const pathX = y => docW / 2 + amp * Math.sin((y - y0) / wave);
+// Laptop: a wide S-curve across the board. Phone: a thread down the right margin, so it never sits on text.
+const pathX = y => isMobile() ? docW - 7 + 2 * Math.sin((y - y0) / 160) : docW / 2 + amp * Math.sin((y - y0) / wave);
 function layoutCrawl(){
   const footer = document.querySelector('footer');
   docW = document.documentElement.clientWidth;
@@ -419,14 +425,14 @@ function layoutCrawl(){
   crawl.style.height = docH + 'px'; crawlSvg.setAttribute('viewBox', `0 0 ${docW} ${docH}`);
   y0 = hero.offsetTop + hero.offsetHeight + 40;
   yEnd = footer.offsetTop - 60;
-  amp = Math.min(docW * .4, 560); wave = isMobile() ? 300 : 420;
+  amp = Math.min(docW * .4, 560); wave = 420;
   updateCrawl();
 }
 function updateCrawl(){
   const y = Math.min(yEnd, Math.max(y0, scrollY + innerHeight * .62));
-  const x = pathX(y), slope = amp / wave * Math.cos((y - y0) / wave);
+  const x = pathX(y), slope = isMobile() ? 2 / 160 * Math.cos((y - y0) / 160) : amp / wave * Math.cos((y - y0) / wave), half = crawler.offsetWidth / 2;
   const deg = Math.atan2(1, slope) * 180 / Math.PI + 90;
-  crawler.style.transform = `translate(${x - 25}px, ${y - 25}px) rotate(${deg}deg)`;
+  crawler.style.transform = `translate(${x - half}px, ${y - half}px) rotate(${deg}deg)`;
   crawler.classList.toggle('on', scrollY + innerHeight * .62 > y0 - 20);
   let d = '';
   for (let t = y0; t <= y; t += 14) d += (d ? 'L' : 'M') + pathX(t).toFixed(1) + ' ' + t.toFixed(1);
@@ -435,9 +441,10 @@ function updateCrawl(){
 function onScroll(){
   updateCrawl();
   if (!reduced.matches) { crawler.classList.add('walking'); clearTimeout(walkTimer); walkTimer = setTimeout(() => crawler.classList.remove('walking'), 180); }
-  const hb = hero.getBoundingClientRect().bottom, fr = $('founding').getBoundingClientRect();
+  const hb = hero.getBoundingClientRect().bottom, fr = $('founding').getBoundingClientRect(), fc = $('final').getBoundingClientRect();
   $('topbar').classList.toggle('solid', hb < 80);
-  $('mbar').classList.toggle('show', hb < innerHeight * .5 && !(fr.top < innerHeight && fr.bottom > 0));
+  const over = r => r.top < innerHeight && r.bottom > 0;
+  $('mbar').classList.toggle('show', hb < innerHeight * .5 && !over(fr) && !over(fc));
   $('scroll-cue').classList.toggle('hidden', scrollY > 40);
 }
 addEventListener('scroll', onScroll, {passive:true});
@@ -446,5 +453,5 @@ addEventListener('load', layoutCrawl);
 resize(); onScroll(); requestAnimationFrame(render);
 
 /* ---------- Reveal on scroll ---------- */
-const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {rootMargin:'0px 0px -8% 0px'});
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {rootMargin:'0px 0px 12% 0px'});
 document.querySelectorAll('.rv').forEach(n => io.observe(n));

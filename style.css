@@ -412,19 +412,81 @@ body{background-image:url("smudges.svg"),url("data:image/svg+xml,%3Csvg xmlns='h
 #web-canvas,#web-canvas.dragging{cursor:default;touch-action:pan-y}
 #web-canvas.over-node{cursor:pointer}
 
-/* ================= v5: disposable-camera photos magneted to the board ================= */
-.pins{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.pin{position:absolute;left:0;top:0;width:clamp(150px,12.5vw,196px);margin:0;padding:9px 9px 0;background:#f2eee4;opacity:0;will-change:transform,opacity;
-  box-shadow:0 22px 34px -8px rgba(0,0,0,.55),0 3px 6px rgba(0,0,0,.35)}
-.pin .ph{position:relative;aspect-ratio:1;overflow:hidden;background:#1d2420}
-.pin img{display:block;width:100%;height:100%;object-fit:cover;filter:contrast(1.12) saturate(1.12) sepia(.16) brightness(1.03)}
-/* on-camera flash falloff and film grain */
-.pin .ph::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(circle at 50% 42%,rgba(255,250,235,.14),transparent 46%,rgba(10,8,4,.38) 100%)}
-.pin .ph::after{content:"";position:absolute;inset:0;z-index:1;opacity:.5;mix-blend-mode:overlay;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-/* the orange date stamp disposable cameras print in the corner */
-.pin .stamp{position:absolute;right:8px;bottom:6px;z-index:2;font:600 11px/1 'Courier New',monospace;letter-spacing:.1em;color:#ff9b3d;text-shadow:0 0 4px rgba(255,120,30,.85),0 0 1px #ffb15e}
-.pin figcaption{font-family:'Caveat',cursive;font-weight:600;font-size:1.3rem;line-height:1.05;color:#2b2a27;text-align:center;padding:6px 4px 9px}
-/* gold magnet holding it to the board */
-.pin .magnet{position:absolute;top:-8px;left:50%;z-index:3;width:19px;height:19px;border-radius:50%;transform:translateX(-50%);
-  background:radial-gradient(circle at 34% 30%,#fff7d1 0,#f2dc7d 30%,#c39a34 68%,#7c5e19 100%);box-shadow:0 5px 7px rgba(0,0,0,.5),inset 0 -2px 3px rgba(0,0,0,.25)}
-@media(max-width:760px){.pin{width:112px;padding:6px 6px 0}.pin figcaption{font-size:1rem;padding:4px 2px 6px}.pin .stamp{font-size:8px;right:5px;bottom:4px}.pin .magnet{width:15px;height:15px;top:-6px}}
+/* ================= v6: phone-first pass (research: meuze, consulting, apple, linear) ================= */
+/* One type system everywhere: tight grotesk statements, italic serif accents, balanced line breaks */
+h1,h2{text-wrap:balance}
+h2{font-family:'Inter Tight',var(--font);letter-spacing:-.035em}
+h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400;letter-spacing:-.01em;font-size:1.1em;line-height:.95}
+.lead,.intro-hud p{text-wrap:pretty}
+
+/* Reveal: shorter and subtler, so nothing sits blank during a fast flick */
+.rv{transform:translateY(14px);transition-duration:.6s}
+
+/* Why we built OCTO: the spider hanging on its web, not a generic icon */
+.why-art svg{width:auto;filter:none}
+.why-art>svg.why-web{width:74%;height:auto;filter:drop-shadow(0 0 18px rgba(244,244,239,.14))}
+.why-art .ww{fill:none;stroke:rgba(244,244,239,.2);stroke-width:1}
+.why-art .silk{stroke:rgba(244,244,239,.55);stroke-width:1}
+.why-art .why-spider{width:88px;height:88px;overflow:visible}
+.why-art .sl{fill:none;stroke:var(--ink);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.why-art .sj{fill:var(--accent-hi)}
+.why-art .sb{fill:var(--ink)}
+.why-art .sr{fill:none;stroke:var(--accent-hi);stroke-width:.8}
+
+/* How to join: a thread timeline (horizontal on laptop, vertical on phone) */
+.join-steps{gap:0}
+.join-steps li{border:0;border-radius:0;background:none;position:relative;padding:0 0 22px 46px}
+.join-steps li::before{position:absolute;left:0;top:-4px;width:30px;height:30px;border-radius:50%;border:1px solid var(--accent-hi);display:grid;place-items:center;margin:0;background:var(--bg);font-size:.62rem;letter-spacing:.06em;z-index:1}
+.join-steps li:not(:last-child)::after{content:"";position:absolute;left:15px;top:26px;bottom:0;border-left:1px dashed rgba(244,244,239,.3)}
+.join-steps b{font-size:1rem}
+.join-steps span{display:block;color:var(--muted);font-size:.9rem;line-height:1.5}
+@media(min-width:760px){
+  .join-steps li{padding:46px 22px 0 0}
+  .join-steps li:not(:last-child)::after{left:34px;right:4px;top:15px;bottom:auto;border-left:0;border-top:1px dashed rgba(244,244,239,.3)}
+}
+
+.swipe-hint{display:none}
+
+/* ---------- phone ---------- */
+@media(max-width:760px){
+  :root{--pad:20px}
+  .rv{transform:translateY(10px);transition-duration:.45s}
+  .block{padding:72px 0}
+  .block-tight{padding-top:0}
+  /* touch targets: 44px minimum */
+  .topbar .btn{min-height:44px;padding:0 16px}
+  .mbar .btn{min-height:46px;padding:0 22px}
+
+  /* why: compact art banner instead of a full-screen square */
+  .why{gap:28px}
+  .why-art{aspect-ratio:auto;height:210px;max-width:none}
+  .why-art>svg.why-web{width:auto;height:100%}
+  .signature{font-size:2.2rem}
+
+  /* the eight legs: one tidy list on a silk thread; tap a leg for the full sheet */
+  .legs-grid{display:block;position:relative;margin-top:26px;padding-left:30px}
+  .legs-grid::before{content:"";position:absolute;left:9px;top:18px;bottom:18px;width:1px;background:linear-gradient(var(--accent-hi),rgba(244,244,239,.22))}
+  .legs-grid .leg-card{display:block;width:100%;position:relative;min-height:0;padding:15px 34px 15px 0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none}
+  .legs-grid .leg-card:last-child{border-bottom:0}
+  .legs-grid .leg-card::before{content:"";position:absolute;left:-26px;top:22px;width:11px;height:11px;border-radius:50%;background:var(--bg);border:1.5px solid var(--accent-hi)}
+  .legs-grid .leg-card::after{content:"→";position:absolute;right:4px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1rem}
+  .legs-grid .leg-card span{display:block;font-size:.58rem}
+  .legs-grid .leg-card b{display:block;font-size:1.08rem;margin-top:3px}
+  .legs-grid .leg-card i{display:none}
+  .legs-grid .leg-card:active{background:rgba(244,244,239,.05)}
+
+  /* testimonials: a swipe row with the next card peeking, not four stacked placeholders */
+  .testis{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:28px calc(-1 * var(--pad)) 0;padding:2px var(--pad) 6px;scroll-padding-left:var(--pad);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .testis::-webkit-scrollbar{display:none}
+  .testis .testi{flex:0 0 84%;scroll-snap-align:start;min-height:0;padding:20px}
+  .testis .testi.rv{opacity:1;transform:none}
+  .swipe-hint{display:block;margin-top:10px;text-align:right;color:var(--muted);font-weight:700;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase}
+
+  /* the little spider: hangs on a thread down the right margin */
+  .crawler{width:26px;height:26px}
+  .crawl-trail path{stroke-dasharray:none;stroke-width:1;stroke:rgba(244,244,239,.2)}
+
+  .final-card{padding:52px 22px}
+  .final-card .btn{width:100%}
+  .offer-copy .btn{width:100%}
+}

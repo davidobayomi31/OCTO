@@ -16,9 +16,8 @@ Then open http://localhost:8731/ in your browser.
 
 - `index.html` holds the page structure and copy.
 - `style.css` holds the chalkboard theme and the laptop and phone layouts.
-- `app.js` has three parts:
-  - the 3D web, the spider and its lair
-  - the photos on the board
+- `app.js` has two parts:
+  - the 3D web, the big spider, the eight small spiders and the lair
   - the panels and the scroll effects
 - `smudges.svg` is the chalk-smudge texture for the board.
 
@@ -30,4 +29,11 @@ The settings are at the top of `app.js`:
 - `LINKS.vsl` takes an optional pitch video, either a YouTube link or an .mp4 file.
 - `SPOTS_TAKEN` is the number of Founding 10 spots already filled.
 
-The photos on the board are placeholders from Unsplash. Swap them for real team photos in the `pinData` list in `app.js`.
+## Phone and laptop
+
+Phone is the priority, since most traffic comes from phones. On phone:
+- The eight legs show as a list on a silk thread.
+- Testimonials are a swipe row.
+- "How to join" is a vertical timeline.
+- The small crawling spider hangs on a thread down the right margin, so it never covers text.
+- Every tap target is at least 44px.

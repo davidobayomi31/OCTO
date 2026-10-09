@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600&family=Instrument+Serif:ital@0;1&family=Caveat:wght@500;600&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600&family=Instrument+Serif:ital@0;1&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./style.css">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.min.js"}}</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -40,11 +40,9 @@
 </header>
 
 <main id="top">
-  <!-- 1. HERO: the web. As you scroll, the web fades and the board slides with the spider to its lair. -->
+  <!-- 1. HERO: the web. As you scroll, the web fades, eight small spiders burst out of the big one, and they all crawl into the lair. -->
   <section class="hero" id="hero" aria-label="OCTO">
     <div class="stage">
-      <!-- photos magneted to the board along the spider's walk (drawn under the 3D scene) -->
-      <div class="pins" id="pins" aria-hidden="true"></div>
       <canvas id="web-canvas" aria-label="Interactive web of the eight OCTO steps. Select a leg to open it."></canvas>
       <div class="hud">
         <div class="intro-hud" id="intro-hud">
@@ -79,7 +77,7 @@
   <section class="block" id="why">
     <div class="wrap why">
       <div class="why-art rv" aria-hidden="true">
-        <svg viewBox="0 0 200 200"><g fill="none" stroke="#f4f4ef" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M100 22v38M100 140v38M22 100h38M140 100h38M45 45l27 27M128 128l27 27M155 45l-27 27M72 128l-27 27"/></g><circle cx="100" cy="100" r="18" fill="none" stroke="#f2dc7d" stroke-width="3"/><circle cx="100" cy="100" r="6" fill="#f2dc7d"/></svg>
+        <svg viewBox="0 0 200 240" class="why-web"><g class="ww"><polygon points="124.8,117.7 109.9,104.0 90.3,104.7 75.0,117.7 76.6,137.7 90.1,151.8 110.3,152.8 123.1,137.6"/><polygon points="140.7,111.2 117.3,86.2 83.8,89.0 58.4,110.8 59.0,145.0 83.7,167.2 117.5,170.2 140.0,144.6"/><polygon points="155.6,105.0 124.7,68.4 76.8,72.1 43.2,104.5 40.7,152.6 77.2,183.1 124.1,186.2 158.3,152.1"/><polygon points="171.0,98.6 131.3,52.4 69.1,53.4 28.7,98.5 23.3,159.8 69.9,200.8 130.1,200.6 176.8,159.8"/><polygon points="188.5,91.4 137.2,38.3 61.2,34.3 12.9,91.9 8.1,166.1 61.8,220.1 136.1,215.1 193.6,166.8"/><line x1="100" y1="128" x2="196.1" y2="88.2"/><line x1="100" y1="128" x2="139.8" y2="31.9"/><line x1="100" y1="128" x2="60.2" y2="31.9"/><line x1="100" y1="128" x2="3.9" y2="88.2"/><line x1="100" y1="128" x2="3.9" y2="167.8"/><line x1="100" y1="128" x2="60.2" y2="224.1"/><line x1="100" y1="128" x2="139.8" y2="224.1"/><line x1="100" y1="128" x2="196.1" y2="167.8"/></g><line class="silk" x1="100" y1="0" x2="100" y2="88"/><svg class="why-spider" x="56" y="84" width="88" height="88" viewBox="0 0 36 36"><path class="sl" d="M15.6 12.6 L9.5 6.2 L7.2 1.4 M20.4 12.6 L26.5 6.2 L28.8 1.4 M15.0 15 L7.4 10.6 L2.2 9.6 M21.0 15 L28.6 10.6 L33.8 9.6 M15.0 18.2 L7.4 21.4 L2.2 24.6 M21.0 18.2 L28.6 21.4 L33.8 24.6 M15.6 21.4 L9.6 28.4 L7.4 34.4 M20.4 21.4 L26.4 28.4 L28.6 34.4"/><circle class="sj" cx="9.5" cy="6.2" r="1.35"/><circle class="sj" cx="26.5" cy="6.2" r="1.35"/><circle class="sj" cx="7.4" cy="10.6" r="1.35"/><circle class="sj" cx="28.6" cy="10.6" r="1.35"/><circle class="sj" cx="7.4" cy="21.4" r="1.35"/><circle class="sj" cx="28.6" cy="21.4" r="1.35"/><circle class="sj" cx="9.6" cy="28.4" r="1.35"/><circle class="sj" cx="26.4" cy="28.4" r="1.35"/><ellipse class="sb" cx="18" cy="21.4" rx="4.3" ry="5.4"/><ellipse class="sb" cx="18" cy="13.4" rx="3.1" ry="2.9"/><ellipse class="sr" cx="18" cy="21.6" rx="2.7" ry="3.6"/></svg></svg>
         <span>EST. 2026</span>
       </div>
       <div class="rv">
@@ -127,6 +125,7 @@
         <p class="lead">The Founding 10 start this month. Their results will live here, in their own words.</p>
       </div>
       <div class="testis" id="testis"></div>
+      <p class="swipe-hint" aria-hidden="true">Swipe <span>→</span></p>
     </div>
   </section>
 
