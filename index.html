@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#18211d">
+<meta name="theme-color" content="#0c0707">
 <title>OCTO — Take control of your life</title>
 <meta name="description" content="OCTO is a mentorship that sharpens how you think, then teaches you high-ticket closing with live coaching and real call reviews. Founding 10 now open.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%2318211d'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%23f2dc7d'/%3E%3Cg stroke='%23f4f4ef' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M32 9v12M32 43v12M9 32h12M43 32h12M16 16l9 9M39 39l9 9M48 16l-9 9M25 39l-9 9'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230c0707'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%23c8463a'/%3E%3Cg stroke='%23f4f4ef' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M32 9v12M32 43v12M9 32h12M43 32h12M16 16l9 9M39 39l9 9M48 16l-9 9M25 39l-9 9'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -26,7 +26,7 @@
         <path class="cl b" d="M3 -6 L11 -14 L15 -24"/><path class="cl a" d="M4 -3 L15 -6 L23 -12"/><path class="cl b" d="M4 1 L15 4 L23 10"/><path class="cl a" d="M3 4 L11 13 L15 23"/>
         <circle cx="0" cy="-6" r="5" fill="#f4f4ef"/><ellipse cx="0" cy="7" rx="7" ry="9.5" fill="#f4f4ef"/>
       </g>
-      <circle cx="0" cy="7" r="2.2" fill="#f2dc7d"/>
+      <circle cx="0" cy="7" r="2.2" fill="#c8463a"/>
     </svg>
   </div>
 </div>
@@ -42,7 +42,7 @@
 </header>
 
 <main id="top">
-  <!-- 1. HERO: as you scroll, the web fades and the spider walks to an empty spot, weaves its home there, then goes inside. -->
+  <!-- 1. HERO: as you scroll, the spider spins its web one leg (one step of OCTO) at a time, then opportunities drift in and get caught. -->
   <section class="hero" id="hero" aria-label="OCTO">
     <div class="stage">
       <canvas id="web-canvas" aria-label="Interactive web of the eight OCTO steps. Select a leg to open it."></canvas>
@@ -56,12 +56,19 @@
             <a href="#legs" class="btn btn-line">See the 8 steps <span aria-hidden="true">↓</span></a>
           </div>
         </div>
+        <div class="step-hud" id="step-hud" aria-live="polite">
+          <div class="kicker" id="step-kick">Leg 01 / 08 · The game</div>
+          <h2 id="step-title">See the game</h2>
+          <p id="step-text"></p>
+          <div class="step-bars" id="step-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <button class="step-open" id="step-open" type="button">What you get in this leg <span aria-hidden="true">→</span></button>
+        </div>
         <div class="home-hud" id="home-hud">
-          <div class="kicker">Home base</div>
+          <div class="kicker">Eight legs. One web.</div>
           <h2>Build a life<br><em>that's yours.</em></h2>
           <p>A spider doesn't wait for food. It builds a web and lets the world come to it. We'll teach you to build yours.</p>
+          <a href="#founding" class="btn btn-solid" data-apply>Apply for the Founding 10</a>
         </div>
-        <nav class="chapter-rail" aria-label="Open a step" id="chapter-rail"></nav>
         <div class="web-labels" id="web-labels"></div>
         <div class="hud-bottom">
           <div class="scroll-cue" id="scroll-cue"><span class="scroll-cue-icon">⌄</span><span>SCROLL</span></div>
@@ -77,7 +84,7 @@
     <div class="wrap why">
       <!-- placeholder: swap for a real team photo, like consulting.com's founder shot -->
       <div class="why-art rv" aria-hidden="true">
-        <svg viewBox="0 0 200 200"><g fill="none" stroke="#f4f4ef" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M100 22v38M100 140v38M22 100h38M140 100h38M45 45l27 27M128 128l27 27M155 45l-27 27M72 128l-27 27"/></g><circle cx="100" cy="100" r="18" fill="none" stroke="#f2dc7d" stroke-width="3"/><circle cx="100" cy="100" r="6" fill="#f2dc7d"/></svg>
+        <svg viewBox="0 0 200 200"><g fill="none" stroke="#f4f4ef" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M100 22v38M100 140v38M22 100h38M140 100h38M45 45l27 27M128 128l27 27M155 45l-27 27M72 128l-27 27"/></g><circle cx="100" cy="100" r="18" fill="none" stroke="#c8463a" stroke-width="3"/><circle cx="100" cy="100" r="6" fill="#c8463a"/></svg>
         <span>EST. 2026</span>
       </div>
       <div class="rv">

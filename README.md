@@ -40,5 +40,5 @@ Phone is the priority, since most traffic comes from phones. On phone:
 
 ## Saved hero versions
 
-- **Current (main):** the spider leaves the web, walks to an empty spot, weaves its home in one scroll and goes inside on the next.
+- **Current (main):** "Build your web" (see below), in the black and red theme.
 - **Build your web:** the spider spins the web one leg (one step) at a time, then gold sparks get caught in it. It's saved on the `hero-build-your-web` branch, and as a copy in `versions/build-your-web/`. To view it, open http://localhost:8731/versions/build-your-web/ while the local server runs.
