@@ -98,13 +98,13 @@ const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x0c0707, .008);
 const camera = new THREE.PerspectiveCamera(48, 1, .1, 120); camera.position.set(0, 0, 18);
 scene.add(new THREE.AmbientLight(0xf0e8e8, 1.25));
 const keyLight = new THREE.PointLight(0xfffbea, 58, 55); keyLight.position.set(-4, 5, 12); scene.add(keyLight);
-const fillLight = new THREE.PointLight(0x7a2620, 40, 48); fillLight.position.set(5, -3, -12); scene.add(fillLight);
+const fillLight = new THREE.PointLight(0x5e1018, 40, 48); fillLight.position.set(5, -3, -12); scene.add(fillLight);
 const warmLight = new THREE.PointLight(0xffe2dc, 46, 38); warmLight.position.set(4, 3, 0); scene.add(warmLight);
 const world = new THREE.Group(); scene.add(world);
 const web = new THREE.Group(); world.add(web); // the 8-leg web: spun strand by strand as you scroll
 const webLine = new THREE.LineBasicMaterial({color:0xd6cdcc, transparent:true, opacity:.26, depthWrite:false});
 const glowLine = new THREE.LineBasicMaterial({color:0xf4f4ef, transparent:true, opacity:.5, depthWrite:false});
-const yellowLine = new THREE.LineBasicMaterial({color:0xc8463a, transparent:true, opacity:.32, depthWrite:false});
+const yellowLine = new THREE.LineBasicMaterial({color:0xb8202e, transparent:true, opacity:.32, depthWrite:false});
 const legMaterial = glossy({color:0xf1f1ea, metalness:.02, roughness:.62, clearcoat:.75, clearcoatRoughness:.16});
 const jointMaterial = glossy({color:0x111111, metalness:.02, roughness:.5, clearcoat:.9, clearcoatRoughness:.12});
 const coreMaterial = glossy({color:0xf3f3ec, metalness:.02, roughness:.55, clearcoat:.9, clearcoatRoughness:.12, emissive:0x0a0a0a});
@@ -156,9 +156,9 @@ for (let ring = 1; ring <= 6; ring++) {
 const built = new Array(8).fill(0);
 for (let i = 0; i < 8; i++) {
   const a = legAngles[i], tip = pointOn(3.38, a, .18);
-  const mat = glossy({color:i === 0 ? 0xf4f4ef : 0xe5dfdf, emissive:0xc8463a, emissiveIntensity:0, metalness:.04, roughness:.48, clearcoat:1, clearcoatRoughness:.1, transparent:true});
+  const mat = glossy({color:i === 0 ? 0xf4f4ef : 0xe5dfdf, emissive:0xb8202e, emissiveIntensity:0, metalness:.04, roughness:.48, clearcoat:1, clearcoatRoughness:.1, transparent:true});
   const node = makeSphere(.24, mat, tip); node.userData = {index:i}; hitNodes.push(node);
-  const halo = new THREE.Mesh(new THREE.TorusGeometry(.37, .014, 8, 48), new THREE.MeshBasicMaterial({color:0xc8463a, transparent:true, opacity:.8})); halo.position.copy(tip); web.add(halo);
+  const halo = new THREE.Mesh(new THREE.TorusGeometry(.37, .014, 8, 48), new THREE.MeshBasicMaterial({color:0xb8202e, transparent:true, opacity:.8})); halo.position.copy(tip); web.add(halo);
   nodes.push({node, halo, mat});
   anchors.push(tip.clone().add(V(.25, .36, .12)));
   const hit = makeTube([pointOn(.2, a, .12), pointOn(1.4, a, .12), pointOn(2.5, a, .16), tip], .17, hitMaterial); hit.userData = {index:i}; hitNodes.push(hit);
@@ -195,7 +195,7 @@ backText.position.set(0, -.25, spiderZ + .49); spider.add(backText);
 // The catch: once the web is done, small gold lights (opportunities) drift in from the dark and stick to it.
 const glowCanvas = document.createElement('canvas'); glowCanvas.width = glowCanvas.height = 128;
 { const g = glowCanvas.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-  gr.addColorStop(0, 'rgba(255,205,195,1)'); gr.addColorStop(.22, 'rgba(200,70,58,.6)'); gr.addColorStop(1, 'rgba(200,70,58,0)');
+  gr.addColorStop(0, 'rgba(255,200,205,1)'); gr.addColorStop(.22, 'rgba(184,32,46,.6)'); gr.addColorStop(1, 'rgba(184,32,46,0)');
   g.fillStyle = gr; g.fillRect(0, 0, 128, 128); }
 const sparkTex = new THREE.CanvasTexture(glowCanvas);
 const sparks = Array.from({length:28}, (_, i) => {
