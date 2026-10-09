@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#18211d">
+<title>OCTO — Take control of your life</title>
+<meta name="description" content="OCTO is a mentorship that sharpens how you think, then teaches you high-ticket closing with live coaching and real call reviews. Founding 10 now open.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%2318211d'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%23f2dc7d'/%3E%3Cg stroke='%23f4f4ef' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M32 9v12M32 43v12M9 32h12M43 32h12M16 16l9 9M39 39l9 9M48 16l-9 9M25 39l-9 9'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600&family=Instrument+Serif:ital@0;1&family=Caveat:wght@500;600&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.min.js"}}</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+<div class="crawl" id="crawl" aria-hidden="true">
+  <svg class="crawl-trail" id="crawl-trail"><path id="trail-path"/></svg>
+  <div class="crawler" id="crawler">
+    <svg viewBox="-30 -30 60 60">
+      <defs><filter id="chalk"><feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/></filter></defs>
+      <g filter="url(#chalk)" fill="none" stroke="#f4f4ef" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path class="cl a" d="M-3 -6 L-11 -14 L-15 -24"/><path class="cl b" d="M-4 -3 L-15 -6 L-23 -12"/><path class="cl a" d="M-4 1 L-15 4 L-23 10"/><path class="cl b" d="M-3 4 L-11 13 L-15 23"/>
+        <path class="cl b" d="M3 -6 L11 -14 L15 -24"/><path class="cl a" d="M4 -3 L15 -6 L23 -12"/><path class="cl b" d="M4 1 L15 4 L23 10"/><path class="cl a" d="M3 4 L11 13 L15 23"/>
+        <circle cx="0" cy="-6" r="5" fill="#f4f4ef"/><ellipse cx="0" cy="7" rx="7" ry="9.5" fill="#f4f4ef"/>
+      </g>
+      <circle cx="0" cy="7" r="2.2" fill="#f2dc7d"/>
+    </svg>
+  </div>
+</div>
+
+<header class="topbar" id="topbar">
+  <a class="brand" href="#top" aria-label="OCTO home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36"><path class="sl" d="M15.6 12.6 L9.5 6.2 L7.2 1.4 M20.4 12.6 L26.5 6.2 L28.8 1.4 M15.0 15 L7.4 10.6 L2.2 9.6 M21.0 15 L28.6 10.6 L33.8 9.6 M15.0 18.2 L7.4 21.4 L2.2 24.6 M21.0 18.2 L28.6 21.4 L33.8 24.6 M15.6 21.4 L9.6 28.4 L7.4 34.4 M20.4 21.4 L26.4 28.4 L28.6 34.4"/><circle class="sj" cx="9.5" cy="6.2" r="1.35"/><circle class="sj" cx="26.5" cy="6.2" r="1.35"/><circle class="sj" cx="7.4" cy="10.6" r="1.35"/><circle class="sj" cx="28.6" cy="10.6" r="1.35"/><circle class="sj" cx="7.4" cy="21.4" r="1.35"/><circle class="sj" cx="28.6" cy="21.4" r="1.35"/><circle class="sj" cx="9.6" cy="28.4" r="1.35"/><circle class="sj" cx="26.4" cy="28.4" r="1.35"/><ellipse class="sb" cx="18" cy="21.4" rx="4.3" ry="5.4"/><ellipse class="sb" cx="18" cy="13.4" rx="3.1" ry="2.9"/><ellipse class="sr" cx="18" cy="21.6" rx="2.7" ry="3.6"/></svg></span><span>OCTO<span class="brand-dot">.</span></span></a>
+  <div class="top-actions">
+    <button id="index-open" class="btn btn-line index-open" type="button">The 8 steps ＋</button>
+    <a href="#founding" class="btn btn-solid" data-apply>Apply</a>
+  </div>
+</header>
+
+<main id="top">
+  <!-- 1. HERO: the web. As you scroll, the web fades and the board slides with the spider to its lair. -->
+  <section class="hero" id="hero" aria-label="OCTO">
+    <div class="stage">
+      <!-- photos magneted to the board along the spider's walk (drawn under the 3D scene) -->
+      <div class="pins" id="pins" aria-hidden="true"></div>
+      <canvas id="web-canvas" aria-label="Interactive web of the eight OCTO steps. Select a leg to open it."></canvas>
+      <div class="hud">
+        <div class="intro-hud" id="intro-hud">
+          <div class="kicker">Founding 10 / now open</div>
+          <h1>Take control<br><em>of your life.</em></h1>
+          <p>OCTO is a mentorship that sharpens how you think, then teaches you high-ticket closing, a skill companies pay real commission for. You learn it live, practice it out loud and get coached on real calls until it's second nature.</p>
+          <div class="intro-ctas">
+            <a href="#founding" class="btn btn-solid" data-apply>Apply for the Founding 10</a>
+            <a href="#legs" class="btn btn-line">See the 8 steps <span aria-hidden="true">↓</span></a>
+          </div>
+        </div>
+        <div class="home-hud" id="home-hud" aria-hidden="true">
+          <div class="kicker">Home base</div>
+          <h2>Build a life<br><em>that's yours.</em></h2>
+          <p>A spider doesn't wait for food. It builds a web and lets the world come to it. We'll teach you to build yours.</p>
+        </div>
+        <nav class="chapter-rail" aria-label="Open a step" id="chapter-rail"></nav>
+        <div class="web-labels" id="web-labels"></div>
+        <div class="hud-bottom">
+          <div class="scroll-cue" id="scroll-cue"><span class="scroll-cue-icon">⌄</span><span>SCROLL</span></div>
+          <div class="map-hint"><i></i><span>CLICK A LEG TO OPEN IT</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="strip" aria-hidden="true">
+    <div class="marquee" id="mq"><span>Mindset first</span><span>Eight legs</span><span>Live coaching</span><span>Real call reviews</span><span>Better than yesterday</span></div>
+  </div>
+
+  <!-- 2. WHY WE BUILT OCTO -->
+  <section class="block" id="why">
+    <div class="wrap why">
+      <div class="why-art rv" aria-hidden="true">
+        <svg viewBox="0 0 200 200"><g fill="none" stroke="#f4f4ef" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M100 22v38M100 140v38M22 100h38M140 100h38M45 45l27 27M128 128l27 27M155 45l-27 27M72 128l-27 27"/></g><circle cx="100" cy="100" r="18" fill="none" stroke="#f2dc7d" stroke-width="3"/><circle cx="100" cy="100" r="6" fill="#f2dc7d"/></svg>
+        <span>EST. 2026</span>
+      </div>
+      <div class="rv">
+        <div class="kicker">Why we built OCTO</div>
+        <h2>School taught us to follow instructions. <em>Not how the game works.</em></h2>
+        <p class="lead">We built OCTO to give people what school, and most online courses, never did: a sharper way of thinking and an income skill that holds up in the real world. No recycled tactics, no hype. Just a clear path and coaches who stay with you until it clicks.</p>
+        <div class="signature">The OCTO team</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. THE OFFER: copy on the left, a wall of what you get on the right -->
+  <section class="block block-tight" id="offer">
+    <div class="wrap offer">
+      <div class="offer-copy rv">
+        <div class="kicker">The offer</div>
+        <h2>Alchemy and knowledge to <em>change your life.</em></h2>
+        <p class="lead">Most people were handed one script: study, get a job, wait your turn. We hand you a different one. First we rebuild how you think, then we give you a skill businesses pay serious money for.</p>
+        <div class="vsl" id="vsl"></div>
+        <a href="#founding" class="btn btn-solid" data-apply>Apply for the Founding 10</a>
+      </div>
+      <div class="wall rv" id="wall" aria-label="What you get with OCTO"><div class="wall-track" id="wall-track"></div></div>
+    </div>
+  </section>
+
+  <!-- 4. OCTO = EIGHT: the eight steps -->
+  <section class="block block-tight" id="legs">
+    <div class="wrap">
+      <div class="section-head center rv">
+        <div class="kicker">The eight legs</div>
+        <h2>OCTO = Eight.</h2>
+        <p class="lead">A spider needs all eight legs to move, and so will you. Each leg is one stage of the program, with what you learn and what you walk away with. Tap any of them to look inside.</p>
+      </div>
+      <div class="legs-grid" id="legs-grid"></div>
+      <p class="legs-note">Lesson details are being finalized.</p>
+    </div>
+  </section>
+
+  <!-- 6. TESTIMONIALS (placeholder until the Founding 10 have results) -->
+  <section class="block block-tight" id="testimonials">
+    <div class="wrap">
+      <div class="section-head center rv">
+        <div class="kicker">What our clients are saying</div>
+        <h2>The first stories <em>are being written.</em></h2>
+        <p class="lead">The Founding 10 start this month. Their results will live here, in their own words.</p>
+      </div>
+      <div class="testis" id="testis"></div>
+    </div>
+  </section>
+
+  <!-- 7. FOUNDING 10 + how to join -->
+  <section class="block block-tight" id="founding">
+    <div class="wrap">
+      <div class="section-head rv">
+        <div class="kicker">The Founding 10</div>
+        <h2>Ten spots at the founding price. <em>Then it doubles.</em></h2>
+      </div>
+      <div class="founding">
+        <div class="price-card rv">
+          <div class="seats"><div class="seat-dots" id="seat-dots"></div><span id="seat-text">10 of 10 spots left</span></div>
+          <div class="price">$1,000<small>founding price</small></div>
+          <ul>
+            <li>Live mentorship and coaching calls</li>
+            <li>Mindset: alchemy and psychology</li>
+            <li>The eight-step high-ticket sales system</li>
+            <li>Private client Discord</li>
+            <li>Pay in full, or offered payment plans</li>
+          </ul>
+          <a href="#founding" class="btn btn-solid" data-apply>Apply for a founding spot →</a>
+          <p class="notice" id="apply-notice">The application link is being set up. Check back shortly.</p>
+        </div>
+        <div class="after rv">
+          <div><div class="kicker">After the first 10</div><div class="old">$2,000</div></div>
+          <p class="lead">Once the Founding 10 are in, the price moves to $2,000. The founding price is for the people who start with us.</p>
+        </div>
+      </div>
+      <div class="join rv">
+        <h3>How to join, in four steps.</h3>
+        <ol class="join-steps">
+          <li><b>Apply</b><span>A short application about where you are and where you want to go.</span></li>
+          <li><b>Book a call</b><span>Pick a time that works. You'll get reminders before it.</span></li>
+          <li><b>Talk with our team</b><span>A real conversation on Google Meet. If it's a fit, you're in.</span></li>
+          <li><b>Start the same day</b><span>You're onboarded into the client Discord the day you join.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. FINAL CTA -->
+  <section class="block block-tight" id="final">
+    <div class="wrap">
+      <div class="final-card rv">
+        <div class="kicker">Applications open</div>
+        <h2>Ready <em>when you are.</em></h2>
+        <p class="lead">This could be the decision that changes how the rest of your life goes.</p>
+        <a href="#founding" class="btn btn-solid" data-apply>Apply to join OCTO →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="row"><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36"><path class="sl" d="M15.6 12.6 L9.5 6.2 L7.2 1.4 M20.4 12.6 L26.5 6.2 L28.8 1.4 M15.0 15 L7.4 10.6 L2.2 9.6 M21.0 15 L28.6 10.6 L33.8 9.6 M15.0 18.2 L7.4 21.4 L2.2 24.6 M21.0 18.2 L28.6 21.4 L33.8 24.6 M15.6 21.4 L9.6 28.4 L7.4 34.4 M20.4 21.4 L26.4 28.4 L28.6 34.4"/><circle class="sj" cx="9.5" cy="6.2" r="1.35"/><circle class="sj" cx="26.5" cy="6.2" r="1.35"/><circle class="sj" cx="7.4" cy="10.6" r="1.35"/><circle class="sj" cx="28.6" cy="10.6" r="1.35"/><circle class="sj" cx="7.4" cy="21.4" r="1.35"/><circle class="sj" cx="28.6" cy="21.4" r="1.35"/><circle class="sj" cx="9.6" cy="28.4" r="1.35"/><circle class="sj" cx="26.4" cy="28.4" r="1.35"/><ellipse class="sb" cx="18" cy="21.4" rx="4.3" ry="5.4"/><ellipse class="sb" cx="18" cy="13.4" rx="3.1" ry="2.9"/><ellipse class="sr" cx="18" cy="21.6" rx="2.7" ry="3.6"/></svg></span><span>OCTO<span class="brand-dot">.</span></span></a><div style="display:flex;gap:20px"><a href="#">Terms</a><a href="#">Privacy</a><a href="#">Contact</a></div></div>
+    <p class="disc">OCTO provides education and mentorship. Nothing on this site is financial advice, and we make no guarantee of income or results. Your outcome depends on your effort, skills and circumstances. 3D scene built with Three.js (MIT). © 2026 OCTO.</p>
+  </div>
+</footer>
+
+<div class="mbar" id="mbar"><div><b>Founding 10</b><small id="mbar-seats">$1,000 · 10 spots left</small></div><a href="#founding" class="btn btn-solid" data-apply>Apply</a></div>
+
+<aside id="detail-panel" class="detail-panel" aria-hidden="true">
+  <button class="panel-scrim" id="panel-scrim" aria-label="Close step"></button>
+  <div class="panel-body" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <div class="panel-top"><span id="detail-kicker">STEP 01 / 08</span><button id="panel-close" type="button" aria-label="Close step">×</button></div>
+    <div id="detail-content"></div>
+  </div>
+</aside>
+
+<aside id="index-panel" class="index-panel" aria-hidden="true">
+  <button class="panel-scrim" id="index-scrim" aria-label="Close the steps list"></button>
+  <div class="index-body" role="dialog" aria-modal="true" aria-labelledby="index-title">
+    <div class="panel-top"><span>OCTO / MAP KEY</span><button id="index-close" type="button" aria-label="Close the steps list">×</button></div>
+    <h2 id="index-title">The eight steps.</h2>
+    <p>Open any step of the journey, from seeing the game to taking control.</p>
+    <h3>STEPS</h3><div id="chapter-index" class="index-list"></div>
+  </div>
+</aside>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
