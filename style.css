@@ -495,3 +495,14 @@ h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight
   .wall{height:clamp(480px,64vh,660px)}
   .wall-track{inset:-60px;padding:0 76px}
 }
+
+/* $2,000 card: why the price doubles and what changes after the first 10 */
+.after{justify-content:flex-start;gap:22px}
+.after .old small{font-size:.82rem;font-weight:500;letter-spacing:0;color:var(--muted);margin-left:6px}
+.after-why b{display:block;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-hi);margin-bottom:8px}
+.after-why p{color:var(--soft);font-size:.95rem;line-height:1.6;text-wrap:pretty}
+.after-list{list-style:none;display:grid;gap:12px;border-top:1px solid var(--line);padding-top:18px}
+.after-list li{display:grid;grid-template-columns:118px 1fr;gap:12px;font-size:.92rem;color:var(--soft);line-height:1.45}
+.after-list span{color:var(--ink);font-weight:600}
+.after-note{margin-top:auto;color:var(--muted);font-size:.84rem}
+@media(max-width:760px){.after-list li{grid-template-columns:1fr;gap:2px}}
