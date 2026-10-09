@@ -156,8 +156,17 @@ for (let leg = 0; leg < 8; leg++) {
 const shellMat = new THREE.MeshPhysicalMaterial({color:0xf6f6f0, metalness:.02, roughness:.45, clearcoat:1, clearcoatRoughness:.08, emissive:0x0f1512});
 makeSphere(.47, shellMat, V(0, -.24, spiderZ + .17), [.74, 1.08, .33], spider);
 const rim = new THREE.Mesh(new THREE.TorusGeometry(.36, .018, 8, 56), new THREE.MeshStandardMaterial({color:0xf2dc7d, metalness:.1, roughness:.4})); rim.position.set(0, -.24, spiderZ + .28); spider.add(rim);
-const markMat = new THREE.MeshBasicMaterial({color:0x2a3530});
-for (let m = 0; m < 5; m++) makeSphere(.025, markMat, V((m - 2) * .105, -.28, spiderZ + .49), [1,1,1], spider);
+// "OCTO" written across its back, inside the gold ring
+const backCanvas = document.createElement('canvas'); backCanvas.width = 256; backCanvas.height = 96;
+const backTex = new THREE.CanvasTexture(backCanvas); backTex.colorSpace = THREE.SRGBColorSpace; backTex.anisotropy = 4;
+const drawBack = () => {
+  const g = backCanvas.getContext('2d'); g.clearRect(0, 0, 256, 96);
+  g.fillStyle = '#2a3530'; g.font = "600 68px 'Inter Tight', 'Inter', Arial, sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.letterSpacing = '-2px'; g.fillText('OCTO', 128, 52); backTex.needsUpdate = true;
+};
+drawBack(); document.fonts?.ready.then(drawBack);
+const backText = new THREE.Mesh(new THREE.PlaneGeometry(.6, .225), new THREE.MeshBasicMaterial({map:backTex, transparent:true, depthWrite:false}));
+backText.position.set(0, -.25, spiderZ + .49); spider.add(backText);
 // The spider's home, fit for a queen: a silk funnel (the way in) set in a gold-threaded rose-window web,
 // crowned with eight gold spires (one per leg), hung with silk drapes and studded with dew-drop jewels.
 // The board is empty when the spider arrives; it weaves all of this in one scroll and goes inside on the next.

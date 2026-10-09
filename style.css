@@ -518,3 +518,6 @@ html{scroll-padding-top:84px}
   .founding>.price-card,.founding>.after{flex:0 0 88%;scroll-snap-align:start}
   .founding>.rv{opacity:1;transform:none}
 }
+
+/* phone: no leg numbers on the hero web */
+@media(max-width:760px){.web-labels{display:none}}
