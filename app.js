@@ -69,7 +69,7 @@ let wallTX = 0, wallTY = 0, wallX = 0, wallY = 0;
 wall.addEventListener('pointermove', e => {
   if (e.pointerType !== 'mouse') return;
   const r = wall.getBoundingClientRect();
-  wallTX = -((e.clientX - r.left) / r.width - .5) * 50;
+  wallTX = -((e.clientX - r.left) / r.width - .5) * 28; // small sideways drift, so the side columns never get cut off
   wallTY = -((e.clientY - r.top) / r.height - .5) * 50;
 });
 wall.addEventListener('pointerleave', () => { wallTX = 0; wallTY = 0; });
