@@ -1,4 +1,4 @@
-# OCTA
+# OCTO
 
 The website for OCTO, a live mentorship in mindset and high-ticket closing. It's a static site, and its hero is a 3D chalkboard scene built with Three.js.
 

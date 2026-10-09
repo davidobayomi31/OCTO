@@ -403,7 +403,9 @@ function render(time = 0){
 
   const camU = ss(walk, .06, .44);
   const shiftX = isMobile() ? 0 : -baseZ * .2 * Math.min(1, camera.aspect / 1.6);
-  const shiftY = isMobile() ? baseZ * .19 : 0;
+  // phone: the web starts below the intro text; once you scroll, the camera recentres on the spider, and at the
+  // end it eases up a little so the home sits under the closing line
+  const shiftY = isMobile() ? baseZ * (.19 * (1 - ss(walk, .04, .18)) + .12 * ss(walk, .8, .95)) : 0;
   const camX = shiftX + homeX * camU;
   camera.position.set(camX, shiftY, baseZ); camera.lookAt(camX, shiftY, 0);
   // slide the chalk smudges with the board so it reads as one surface moving

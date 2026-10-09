@@ -510,3 +510,11 @@ h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight
 /* top bar shortcuts to sections (laptop only; phones have the sticky Apply bar) */
 html{scroll-padding-top:84px}
 @media(max-width:760px){.top-link{display:none}}
+
+/* phone: the two price cards sit side by side and swipe, instead of stacking */
+@media(max-width:760px){
+  .founding{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:28px calc(-1 * var(--pad)) 0;padding:2px var(--pad) 6px;scroll-padding-left:var(--pad);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .founding::-webkit-scrollbar{display:none}
+  .founding>.price-card,.founding>.after{flex:0 0 88%;scroll-snap-align:start}
+  .founding>.rv{opacity:1;transform:none}
+}
