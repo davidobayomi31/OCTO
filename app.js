@@ -57,16 +57,6 @@ if (LINKS.vsl) {
   $('vsl').classList.add('on');
 }
 
-/* ---------- Marquee ---------- */
-const mq = $('mq'), mqItems = mq.innerHTML;
-function buildMarquee(){
-  mq.innerHTML = `<div class="mq-group">${mqItems}</div>`;
-  const g = mq.firstElementChild, one = g.scrollWidth, reps = Math.max(1, Math.ceil(innerWidth / one));
-  g.innerHTML = mqItems.repeat(reps); mq.innerHTML += g.outerHTML;
-  mq.style.setProperty('--mq-dur', (one * reps / 40) + 's');
-}
-buildMarquee();
-let mqW = innerWidth; addEventListener('resize', () => { if (innerWidth > mqW) { mqW = innerWidth; buildMarquee(); } });
 
 /* ---------- Offer wall: three drifting columns that follow the cursor (educate.io style) ---------- */
 const wall = $('wall'), wallTrack = $('wall-track');
