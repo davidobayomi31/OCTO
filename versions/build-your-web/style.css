@@ -354,8 +354,8 @@ main,footer{position:relative;z-index:1}
 
 /* ================= v3: lair hero, spider logo, chalk smudges ================= */
 /* hero: about 3-4 scrolls; web fades, board slides with the spider to its lair */
-.hero{height:330vh}
-@media(max-width:760px){.hero{height:320vh}}
+.hero{height:280vh}
+@media(max-width:760px){.hero{height:270vh}}
 .home-hud{position:absolute;left:clamp(24px,7vw,112px);top:50%;width:min(440px,36vw);transform:translateY(-46%);opacity:0;visibility:hidden;z-index:3}
 .home-hud .kicker{margin-bottom:22px}
 .home-hud h2{font-size:clamp(2.1rem,2.8vw + 1rem,4.2rem);line-height:1.04;letter-spacing:-.06em;margin-bottom:18px;text-shadow:0 16px 70px rgba(12,18,13,.7)}
@@ -482,10 +482,30 @@ h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight
   .offer-copy .btn{width:100%}
 }
 
-/* ================= v8: lair hero with a weaving scroll ================= */
-/* once the spider leaves the web, the leg rail, labels and hint step aside */
-.chapter-rail,.map-hint,.web-labels{transition:opacity .35s}
-.hero.left-web .chapter-rail,.hero.left-web .map-hint,.hero.left-web .web-labels{opacity:0;pointer-events:none}
-.hero.left-web .chapter-rail *,.hero.left-web .web-labels *{pointer-events:none}
+/* ================= v7: "build your web" hero ================= */
+/* the leg being spun, shown where the intro was */
+.step-hud{position:absolute;left:clamp(24px,7vw,112px);top:50%;width:min(400px,33vw);transform:translateY(-46%);opacity:0;visibility:hidden;z-index:3}
+.step-hud .kicker{margin-bottom:16px;font-size:.62rem}
+.step-hud h2{font-family:'Inter Tight',var(--font);font-weight:600;font-size:clamp(2rem,2.3vw + .9rem,3.4rem);line-height:1.02;letter-spacing:-.045em;margin-bottom:14px;text-shadow:0 16px 70px rgba(12,18,13,.7)}
+.step-hud p{color:var(--soft);font-size:.95rem;line-height:1.6;max-width:340px;min-height:3.2em}
+.step-hud.flip h2,.step-hud.flip p{animation:stepIn .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes stepIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.step-bars{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin:22px 0 18px;max-width:340px}
+.step-bars i{--f:0;position:relative;height:3px;border-radius:2px;background:rgba(244,244,239,.16);overflow:hidden}
+.step-bars i::after{content:"";position:absolute;inset:0;background:var(--accent-hi);transform:scaleX(var(--f));transform-origin:left}
+.step-open{color:var(--accent-hi);font-weight:600;font-size:.86rem;padding:10px 0;min-height:44px;border-bottom:1px solid rgba(242,220,125,.35)}
+.step-open:hover{border-color:var(--accent-hi)}
 .home-hud .btn{margin-top:22px}
-@media(max-width:760px){.home-hud .btn{width:100%;margin-top:18px}}
+/* rail: legs already spun turn gold; the one being spun is outlined */
+.rail-dot.built{border-color:var(--accent-hi);color:var(--accent-hi)}
+.rail-dot.now{background:var(--accent-hi);color:#18211d;border-color:var(--accent-hi)}
+.web-label{transition:opacity .3s}
+@media(max-width:900px){.step-hud{width:min(380px,44vw)}}
+@media(max-width:760px){
+  .step-hud{left:0;right:0;top:62px;width:auto;transform:none;padding:22px var(--pad) 36px;background:linear-gradient(180deg,rgba(13,19,14,.92) 62%,rgba(13,19,14,0))}
+  .step-hud .kicker{margin-bottom:12px;font-size:.58rem}
+  .step-hud h2{font-size:clamp(1.9rem,8.4vw,2.4rem);margin-bottom:8px}
+  .step-hud p{font-size:.92rem;line-height:1.5;max-width:none;min-height:2.9em}
+  .step-bars{margin:16px 0 6px;max-width:none}
+  .home-hud .btn{width:100%;margin-top:18px}
+}

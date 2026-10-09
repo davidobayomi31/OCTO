@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1800" viewBox="0 0 1600 1800">
+  <defs>
+    <!-- chalky, broken edges: blur then roughen with noise -->
+    <filter id="smear" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="22"/>
+      <feTurbulence type="fractalNoise" baseFrequency=".035 .5" numOctaves="3" seed="4" result="grain"/>
+      <feDisplacementMap in="SourceGraphic" in2="grain" scale="40"/>
+    </filter>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="46"/></filter>
+    <filter id="streak" x="-20%" y="-60%" width="140%" height="220%">
+      <feTurbulence type="fractalNoise" baseFrequency=".004 .09" numOctaves="2" seed="9" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="26" result="d"/>
+      <feGaussianBlur in="d" stdDeviation="5"/>
+    </filter>
+  </defs>
+  <g fill="#f4f4ef">
+    <!-- big soft clouds where the board was wiped -->
+    <ellipse cx="260" cy="230" rx="300" ry="110" opacity=".05" filter="url(#soft)" transform="rotate(-8 260 230)"/>
+    <ellipse cx="1250" cy="620" rx="260" ry="90" opacity=".045" filter="url(#soft)" transform="rotate(6 1250 620)"/>
+    <ellipse cx="520" cy="1180" rx="340" ry="120" opacity=".04" filter="url(#soft)" transform="rotate(-4 520 1180)"/>
+    <ellipse cx="1380" cy="1560" rx="240" ry="100" opacity=".045" filter="url(#soft)"/>
+    <!-- smaller rubbed-out patches -->
+    <ellipse cx="900" cy="140" rx="150" ry="40" opacity=".06" filter="url(#smear)" transform="rotate(-12 900 140)"/>
+    <ellipse cx="160" cy="820" rx="120" ry="34" opacity=".055" filter="url(#smear)" transform="rotate(10 160 820)"/>
+    <ellipse cx="1080" cy="1040" rx="170" ry="38" opacity=".05" filter="url(#smear)" transform="rotate(-6 1080 1040)"/>
+    <ellipse cx="760" cy="1640" rx="140" ry="36" opacity=".055" filter="url(#smear)" transform="rotate(14 760 1640)"/>
+  </g>
+  <!-- eraser swipes: long, faint arcs -->
+  <g fill="none" stroke="#f4f4ef" stroke-linecap="round" filter="url(#streak)">
+    <path d="M80 470 C 380 400, 700 430, 980 520" stroke-width="46" opacity=".03"/>
+    <path d="M110 510 C 400 450, 680 470, 900 545" stroke-width="18" opacity=".05"/>
+    <path d="M1120 260 C 1300 220, 1460 250, 1560 330" stroke-width="38" opacity=".035"/>
+    <path d="M260 1430 C 520 1360, 820 1380, 1100 1460" stroke-width="54" opacity=".028"/>
+    <path d="M1240 860 C 1360 900, 1460 980, 1530 1090" stroke-width="30" opacity=".04"/>
+  </g>
+  <!-- a few leftover chalk flecks -->
+  <g fill="#f4f4ef">
+    <circle cx="430" cy="300" r="1.6" opacity=".25"/><circle cx="1190" cy="700" r="1.3" opacity=".22"/>
+    <circle cx="640" cy="1210" r="1.8" opacity=".2"/><circle cx="1460" cy="1500" r="1.4" opacity=".25"/>
+    <circle cx="210" cy="1690" r="1.2" opacity=".2"/><circle cx="980" cy="420" r="1.1" opacity=".22"/>
+  </g>
+</svg>

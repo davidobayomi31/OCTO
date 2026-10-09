@@ -57,6 +57,7 @@ if (LINKS.vsl) {
   $('vsl').classList.add('on');
 }
 
+
 /* ---------- Offer wall: three drifting columns that follow the cursor (educate.io style) ---------- */
 const wall = $('wall'), wallTrack = $('wall-track');
 const tileHTML = ([tag, title, text, hl]) => `<div class="wtile${hl ? ' hl' : ''}"><span class="tag">${tag}</span><b>${title}</b><i>${text}</i></div>`;
@@ -94,11 +95,10 @@ const keyLight = new THREE.PointLight(0xfffbea, 58, 55); keyLight.position.set(-
 const fillLight = new THREE.PointLight(0x7fb8a0, 40, 48); fillLight.position.set(5, -3, -12); scene.add(fillLight);
 const warmLight = new THREE.PointLight(0xfff3c4, 46, 38); warmLight.position.set(4, 3, 0); scene.add(warmLight);
 const world = new THREE.Group(); scene.add(world);
-const web = new THREE.Group(); world.add(web); // the 8-leg web: fades out as you scroll
+const web = new THREE.Group(); world.add(web); // the 8-leg web: spun strand by strand as you scroll
 const webLine = new THREE.LineBasicMaterial({color:0xc9d3cd, transparent:true, opacity:.26, depthWrite:false});
 const glowLine = new THREE.LineBasicMaterial({color:0xf4f4ef, transparent:true, opacity:.5, depthWrite:false});
 const yellowLine = new THREE.LineBasicMaterial({color:0xf2dc7d, transparent:true, opacity:.32, depthWrite:false});
-const chalkLine = new THREE.LineBasicMaterial({color:0xf4f4ef, transparent:true, opacity:.85});
 const legMaterial = new THREE.MeshPhysicalMaterial({color:0xf1f1ea, metalness:.02, roughness:.62, clearcoat:.75, clearcoatRoughness:.16});
 const jointMaterial = new THREE.MeshPhysicalMaterial({color:0xf2dc7d, metalness:.02, roughness:.5, clearcoat:.9, clearcoatRoughness:.12});
 const coreMaterial = new THREE.MeshPhysicalMaterial({color:0xf3f3ec, metalness:.02, roughness:.55, clearcoat:.9, clearcoatRoughness:.12, emissive:0x0f1512});
@@ -111,23 +111,43 @@ const pointOn = (r, a, z = 0) => new THREE.Vector3(Math.cos(a) * r, Math.sin(a) 
 const V = (x, y, z = 0) => new THREE.Vector3(x, y, z);
 
 const legAngles = Array.from({length:8}, (_, i) => i * Math.PI / 4 + Math.PI / 8);
-for (let ring = 1; ring <= 6; ring++) {
-  const radius = .72 + ring * .62, pts = [];
-  for (let s = 0; s <= 192; s++) { const a = s / 192 * Math.PI * 2; pts.push(pointOn(radius + Math.sin(a * 8 + ring * .7) * .075, a, .015 * Math.sin(a * 5 + ring))); }
-  makeLine(pts, ring === 6 ? glowLine : webLine);
+// Scroll timeline of the build: leg k is spun between stepAt(k) and stepAt(k + 1); the spiral is woven after.
+const STEP0 = .1, STEP = .075, stepAt = k => STEP0 + k * STEP;
+// Every strand has a faint "blueprint" copy that is always there, and a bright copy that gets drawn
+// along its length as you scroll, so you watch the spider spin its web.
+const ghostMats = new Map();
+const ghostOf = m => { if (!ghostMats.has(m)) { const g = m.clone(); g.opacity = m.opacity * .3; ghostMats.set(m, g); } return ghostMats.get(m); };
+const strands = [];
+function spin(pts, mat, from, to){
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  web.add(new THREE.Line(geo, ghostOf(mat)));
+  const live = new THREE.Line(geo.clone(), mat); live.geometry.setDrawRange(0, 0); web.add(live);
+  strands.push({live, n:pts.length, from, to});
 }
-const dotMat = new THREE.MeshBasicMaterial({color:0xe6ebe8, transparent:true});
+// one radial strand per leg, plus the three cross threads in its sector
+const dots = [], dotMat = new THREE.MeshBasicMaterial({color:0xe6ebe8});
 for (let leg = 0; leg < 8; leg++) {
-  const a = legAngles[leg], pts = [];
+  const a = legAngles[leg], pts = [], s0 = stepAt(leg);
   for (let s = 0; s <= 24; s++) pts.push(pointOn(.2 + s / 24 * 4.2, a + Math.sin(s / 24 * Math.PI) * .035, 0));
-  makeLine(pts, glowLine);
-  for (let ring = 1; ring <= 6; ring++) makeSphere(.024, dotMat, pointOn(.72 + ring * .62, a, .025));
+  spin(pts, glowLine, s0, s0 + .05);
+  for (let ring = 1; ring <= 6; ring++) {
+    const d = makeSphere(.024, dotMat, pointOn(.72 + ring * .62, a, .025)); d.visible = false;
+    dots.push({d, at:s0 + .05 * (.52 + ring * .62) / 4.2});
+  }
 }
 for (let t = 0; t < 24; t++) {
-  const a = t * Math.PI / 12, pts = [];
+  const a = t * Math.PI / 12, pts = [], s0 = stepAt(Math.floor(t / 3));
   for (let s = 0; s <= 12; s++) { const u = s / 12; pts.push(pointOn(.8 + u * 3.72, a + u * Math.PI / 4, .02 + Math.sin(u * Math.PI) * .08)); }
-  makeLine(pts, t % 4 === 0 ? yellowLine : webLine);
+  spin(pts, t % 4 === 0 ? yellowLine : webLine, s0 + .03 + (t % 3) * .012, s0 + .07 + (t % 3) * .005);
 }
+// the spiral, woven ring by ring once all eight legs are in
+for (let ring = 1; ring <= 6; ring++) {
+  const radius = .72 + ring * .62, pts = [], from = .69 + (ring - 1) * .02;
+  for (let s = 0; s <= 192; s++) { const a = s / 192 * Math.PI * 2; pts.push(pointOn(radius + Math.sin(a * 8 + ring * .7) * .075, a, .015 * Math.sin(a * 5 + ring))); }
+  spin(pts, ring === 6 ? glowLine : webLine, from, from + .05);
+}
+// the eight leg nodes: faint until their leg is spun, clickable any time
+const built = new Array(8).fill(0);
 for (let i = 0; i < 8; i++) {
   const a = legAngles[i], tip = pointOn(3.38, a, .18);
   const mat = new THREE.MeshPhysicalMaterial({color:i === 0 ? 0xf4f4ef : 0xdfe5e1, emissive:0xf2dc7d, emissiveIntensity:0, metalness:.04, roughness:.48, clearcoat:1, clearcoatRoughness:.1, transparent:true});
@@ -138,12 +158,10 @@ for (let i = 0; i < 8; i++) {
   const hit = makeTube([pointOn(.2, a, .12), pointOn(1.4, a, .12), pointOn(2.5, a, .16), tip], .17, hitMaterial); hit.userData = {index:i}; hitNodes.push(hit);
 }
 
-// The big spider: its own group so it can crawl off the web, weave its home and go inside.
+// The big spider sits at the hub. Each leg turns gold once its strand of the web is spun.
 const spider = new THREE.Group(); world.add(spider);
-// Every material in the web, with its starting opacity, so the whole web can fade together.
-const webMats = new Map();
-web.traverse(o => { if (o.material && o.material !== hitMaterial && !webMats.has(o.material)) { o.material.transparent = true; webMats.set(o.material, o.material.opacity); } });
-const spiderZ = .14, legGroups = [];
+const spiderZ = .14, legGroups = [], legMats = [];
+const legWhite = new THREE.Color(0xf1f1ea), legGold = new THREE.Color(0xf2dc7d);
 makeSphere(.43, coreMaterial, V(0, -.22, spiderZ), [.88, 1.12, .72], spider);
 makeSphere(.31, coreMaterial, V(0, .32, spiderZ + .12), [.92, .86, .72], spider);
 const eyeMat = new THREE.MeshBasicMaterial({color:0x1a231f});
@@ -151,64 +169,29 @@ for (const [x, y] of [[-.18,.43],[-.06,.51],[.06,.51],[.18,.43]]) makeSphere(.03
 for (let leg = 0; leg < 8; leg++) {
   const a = legAngles[leg], side = leg < 4 ? 1 : -1, g = new THREE.Group(); spider.add(g); legGroups.push(g);
   const pts = [V(Math.cos(a) * .23, Math.sin(a) * .23, spiderZ + .05), pointOn(.92, a + .14 * side, spiderZ + .23), pointOn(1.75, a, spiderZ + .02), pointOn(2.52, a - .08 * side, spiderZ - .18)];
-  makeTube(pts, .058, legMaterial, g); makeSphere(.092, jointMaterial, pts[1], [1,1,1], g); makeSphere(.067, jointMaterial, pts[2], [1,1,1], g);
+  const lm = legMaterial.clone(); legMats.push(lm);
+  makeTube(pts, .058, lm, g); makeSphere(.092, jointMaterial, pts[1], [1,1,1], g); makeSphere(.067, jointMaterial, pts[2], [1,1,1], g);
 }
 const shellMat = new THREE.MeshPhysicalMaterial({color:0xf6f6f0, metalness:.02, roughness:.45, clearcoat:1, clearcoatRoughness:.08, emissive:0x0f1512});
 makeSphere(.47, shellMat, V(0, -.24, spiderZ + .17), [.74, 1.08, .33], spider);
 const rim = new THREE.Mesh(new THREE.TorusGeometry(.36, .018, 8, 56), new THREE.MeshStandardMaterial({color:0xf2dc7d, metalness:.1, roughness:.4})); rim.position.set(0, -.24, spiderZ + .28); spider.add(rim);
 const markMat = new THREE.MeshBasicMaterial({color:0x2a3530});
 for (let m = 0; m < 5; m++) makeSphere(.025, markMat, V((m - 2) * .105, -.28, spiderZ + .49), [1,1,1], spider);
-// The spider's home: a silk funnel web. A sheet of threads around a mouth that curves
-// away into the board, lit warm from deep inside. The board is empty when the spider arrives;
-// it weaves this in one scroll (moorings, then the threads down the tunnel, then the rings),
-// and goes inside on the next.
-const lair = new THREE.Group(); world.add(lair);
-const weave = [];  // {line, n, from, to}: drawn along its length between build progress `from` and `to`
-const weaveLine = (pts, mat, from, to) => { const l = makeLine(pts, mat, lair); l.geometry.setDrawRange(0, 0); weave.push({line:l, n:pts.length, from, to}); };
-const lairLine = new THREE.LineBasicMaterial({color:0xe9eee9, transparent:true, opacity:.5, depthWrite:false});
-const lairFaint = new THREE.LineBasicMaterial({color:0xc9d3cd, transparent:true, opacity:.22, depthWrite:false});
-const lairGold = new THREE.LineBasicMaterial({color:0xf2dc7d, transparent:true, opacity:.55, depthWrite:false});
-// funnel profile: [radius, depth]; flares at the mouth, then a long tunnel into the board
-const profile = [[3.1,.05],[2.3,0],[1.6,-.18],[1.08,-.5],[.78,-1],[.62,-1.7],[.55,-2.7],[.5,-4],[.47,-5.4]];
-const funnelAt = (k, a) => { const [r, z] = profile[k]; return V(Math.cos(a) * r, Math.sin(a) * r, z); };
-// threads running down into the tunnel
-for (let t = 0; t < 22; t++) {
-  const a = t / 22 * Math.PI * 2 + Math.sin(t * 3.1) * .04, pts = [];
-  for (let k = 0; k < profile.length; k++) pts.push(funnelAt(k, a + k * .045));
-  weaveLine(new THREE.CatmullRomCurve3(pts).getPoints(48), t % 11 === 0 ? lairGold : lairLine, .12 + t * .012, .3 + t * .012);
-}
-// rings around the funnel, denser near the mouth
-for (let k = 0; k < 26; k++) {
-  const u = Math.pow(k / 25, 1.7) * (profile.length - 1), i = Math.min(profile.length - 2, Math.floor(u)), f = u - i;
-  const r = profile[i][0] + (profile[i + 1][0] - profile[i][0]) * f, z = profile[i][1] + (profile[i + 1][1] - profile[i][1]) * f, pts = [];
-  for (let s2 = 0; s2 <= 96; s2++) { const a = s2 / 96 * Math.PI * 2; pts.push(V(Math.cos(a) * (r + Math.sin(a * 7 + k) * .03 * r), Math.sin(a) * (r + Math.sin(a * 7 + k) * .03 * r), z)); }
-  weaveLine(pts, k === 7 ? lairGold : (k > 2 && k < 10 ? lairLine : lairFaint), .3 + k * .02, .38 + k * .02);
-}
-// the silk surface itself: a faint glossy shell
-const silk = new THREE.Mesh(new THREE.LatheGeometry(profile.map(([r, z]) => new THREE.Vector2(r, z)), 72),
-  new THREE.MeshPhysicalMaterial({color:0xf4f4ef, transparent:true, opacity:0, roughness:.35, clearcoat:1, clearcoatRoughness:.15, side:THREE.DoubleSide, depthWrite:false}));
-silk.rotation.x = Math.PI / 2; lair.add(silk);
-// mooring threads that tie the sheet to the board
-for (let t = 0; t < 9; t++) {
-  const a = t / 9 * Math.PI * 2 + .3, r0 = 3.1, r1 = 5.2 + (t % 3) * .9, pts = [];
-  for (let s2 = 0; s2 <= 12; s2++) { const u = s2 / 12, r = r1 + (r0 - r1) * u; pts.push(V(Math.cos(a + .05 * (1 - u)) * r, Math.sin(a + .05 * (1 - u)) * r, .1 - .05 * u)); }
-  weaveLine(pts, lairFaint, t * .02, .12 + t * .02);  // anchored to the board first, outside in
-}
-// a gold rim at the mouth, matching the spider's shell
-const lairRim = new THREE.Mesh(new THREE.TorusGeometry(1.08, .028, 10, 96), new THREE.MeshStandardMaterial({color:0xf2dc7d, metalness:.2, roughness:.35}));
-lairRim.position.z = -.5; lair.add(lairRim);
-// warm light from deep inside
+// The catch: once the web is done, small gold lights (opportunities) drift in from the dark and stick to it.
 const glowCanvas = document.createElement('canvas'); glowCanvas.width = glowCanvas.height = 128;
 { const g = glowCanvas.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-  gr.addColorStop(0, 'rgba(255,240,190,1)'); gr.addColorStop(.25, 'rgba(242,220,125,.55)'); gr.addColorStop(1, 'rgba(242,220,125,0)');
+  gr.addColorStop(0, 'rgba(255,244,205,1)'); gr.addColorStop(.22, 'rgba(242,220,125,.6)'); gr.addColorStop(1, 'rgba(242,220,125,0)');
   g.fillStyle = gr; g.fillRect(0, 0, 128, 128); }
-const lairGlow = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(glowCanvas), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, opacity:.55}));
-lairGlow.position.z = -4.6; lairGlow.scale.setScalar(2.6); lair.add(lairGlow);
-const lairLight = new THREE.PointLight(0xf2dc7d, 6, 9); lairLight.position.z = -1.2; lair.add(lairLight);
-// tilt the funnel so you look into it at an angle and the tunnel reads as going deep into the board
-lair.rotation.set(.32, -.62, 0);
-const lairAxis = V(0, 0, -1).applyEuler(lair.rotation);
-const dust = []; for (let i = 0; i < 300; i++) dust.push(Math.sin(i * 12.17) * 19 + 7, Math.cos(i * 4.19) * 7, Math.cos(i * 1.71) * 29 - 10);
+const sparkTex = new THREE.CanvasTexture(glowCanvas);
+const sparks = Array.from({length:28}, (_, i) => {
+  const m = new THREE.Sprite(new THREE.SpriteMaterial({map:sparkTex, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, opacity:0}));
+  const ring = 1 + (i * 5) % 6, a = i * 2.39996 + .3;                 // spread evenly over the web
+  const dir = a + Math.sin(i * 1.7) * .9, r0 = 9 + (i % 4) * 1.4;     // fly in from somewhere off the board
+  m.visible = false; web.add(m);
+  return {m, from:V(Math.cos(dir) * r0, Math.sin(dir) * r0, 1.5 + (i % 3)), to:pointOn(.72 + ring * .62, a, .06),
+    at:.78 + i / 28 * .12, size:.34 + (i % 5) * .06};
+});
+const dust = []; for (let i = 0; i < 200; i++) dust.push(Math.sin(i * 12.17) * 11, Math.cos(i * 4.19) * 7, Math.cos(i * 1.71) * 29 - 10);
 const dustGeo = new THREE.BufferGeometry(); dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dust, 3));
 scene.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({color:0xf4f4ef, size:.025, transparent:true, opacity:.5, depthWrite:false})));
 
@@ -268,12 +251,10 @@ addEventListener('keydown', e => { if (e.key === 'Escape') { closeDetail(); clos
 
 /* ---------- Pointer: hover and tap a leg to open it (the view itself is fixed) ---------- */
 const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2();
-let webFade = 1; // 1 = web fully shown; legs can only be picked while it is
 let down = null, orbitX = 0, orbitY = 0, tOrbitX = 0, tOrbitY = 0;
 function pick(e){
   const r = canvas.getBoundingClientRect();
   pointer.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height * 2 - 1));
-  if (webFade < .6) return -1;
   raycaster.setFromCamera(pointer, camera);
   const hit = raycaster.intersectObjects(hitNodes, false)[0];
   return hit ? hit.object.userData.index : -1;
@@ -294,17 +275,22 @@ canvas.addEventListener('pointercancel', () => { down = null; canvas.classList.r
 canvas.addEventListener('pointerleave', () => { if (!down) { setHover(-1); canvas.classList.remove('over-node'); } });
 
 /* ---------- Render ---------- */
-let W = 1, H = 1, baseZ = 10.4, walk = 0, homeX = 13;
-const homeHud = $('home-hud');
+let W = 1, H = 1, baseZ = 10.4, walk = 0, shownStep = -1;
+const homeHud = $('home-hud'), stepHud = $('step-hud');
+const stepBars = [...$('step-bars').children];
+function showStep(k){
+  const c = chapters[k]; shownStep = k;
+  $('step-kick').textContent = `Leg ${pad2(k + 1)} / 08 · ${c.kicker}`;
+  $('step-title').textContent = c.title; $('step-text').textContent = c.summary;
+  stepHud.classList.remove('flip'); void stepHud.offsetWidth; stepHud.classList.add('flip');
+}
+$('step-open').addEventListener('click', () => openDetail(shownStep));
 
 function resize(){
   W = stage.clientWidth; H = stage.clientHeight;
   camera.aspect = W / H; camera.updateProjectionMatrix(); renderer.setSize(W, H, false);
   const vHalf = THREE.MathUtils.degToRad(camera.fov / 2), hHalf = Math.atan(Math.tan(vHalf) * camera.aspect);
   baseZ = THREE.MathUtils.clamp(4.8 / Math.tan(Math.min(vHalf, hHalf)), 10.4, 19);
-  // The lair sits off to the right of the board; the camera slides over to it.
-  homeX = isMobile() ? 10 : 13;
-  lair.position.set(homeX, 0, 0); lair.scale.setScalar(isMobile() ? 1.05 : 1.2);
   layoutCrawl();
 }
 addEventListener('resize', resize, {passive:true});
@@ -317,72 +303,72 @@ function render(time = 0){
   orbitX += (tOrbitX - orbitX) * .08; orbitY += (tOrbitY - orbitY) * .08;
   world.rotation.z = orbitY * .12; world.rotation.x = .1 + orbitX * .12; world.rotation.y = orbitY * .12;
 
-  // Scroll story (about 4-5 scrolls): the web fades and the board slides right with the spider to an
-  // empty spot; it weaves its home there, then goes inside.
+  // Scroll story (about 3-4 scrolls): the spider spins its web one leg at a time (one leg = one step
+  // of OCTO), weaves the spiral, then opportunities drift in and get caught in the finished web.
   const target = reduced.matches ? 0 : heroProgress();
   walk += (target - walk) * .1;
-  const ss = THREE.MathUtils.smoothstep;
-  webFade = 1 - ss(walk, .02, .2);
-  webMats.forEach((base, m) => { m.opacity = base * webFade; });
-  web.visible = webFade > .01;
-  web.position.z = -(1 - webFade) * 2.2; web.scale.setScalar(1 - (1 - webFade) * .08);
-  intro.style.opacity = 1 - ss(walk, .03, .16);
-  intro.style.visibility = walk > .18 ? 'hidden' : 'visible';
-  intro.style.translate = `${-ss(walk, .03, .16) * 40}px 0`;
-  hero.classList.toggle('left-web', walk > .06);
+  const ss = THREE.MathUtils.smoothstep, bw = reduced.matches ? 1 : walk; // reduced motion: show the finished web
+  world.rotation.z = -.22 * ss(walk, .08, .9);
 
-  const u = ss(walk, .08, .42);                    // 1. walking to the empty spot
-  const b = clamp01((walk - .44) / .3);            // 2. weaving its home (one scroll)
-  const e = ss(walk, .76, .93);                    // 3. going inside
-  const moving = Math.abs(target - walk) > .002 && walk > .06 && walk < .93;
-  // while weaving, the spider circles the mouth, laying thread as it goes
-  const orbitR = (isMobile() ? 2.2 : 2.7) * ss(b, 0, .12), theta = b * Math.PI * 2.5;
-  const ox = Math.cos(theta) * orbitR, oy = Math.sin(theta) * orbitR * .85;
-  const e1 = ss(e, 0, .4), e2 = ss(e, .35, 1);     // back to the mouth, then down the tunnel
-  spider.position.set(homeX * u + ox * (1 - e1), Math.sin(u * Math.PI) * .9 + oy * (1 - e1), 0).addScaledVector(lairAxis, e2 * 3.4);
-  const walkHeading = Math.atan2(.9 * Math.PI * Math.cos(u * Math.PI), homeX) - Math.PI / 2;
-  const hb = ss(b, 0, .08);                        // ease from walking heading into the circling heading
-  const heading = b > 0 ? walkHeading * (1 - hb) + (theta + Math.PI / 2 * e1) * hb : walkHeading * ss(walk, .05, .12);
-  spider.rotation.z = heading;
-  spider.scale.setScalar((1 - .35 * ss(b, 0, .15)) * (1 - e2 * .72)); // a little smaller while it works, so the home stays visible
-  spider.visible = e2 < .985;
-  legGroups.forEach((g, i) => { g.rotation.z = moving ? Math.sin(time * .02 + (i % 2) * Math.PI) * .14 : g.rotation.z * .85; });
-  if (moving && e === 0) spider.position.z += Math.abs(Math.sin(time * .02)) * .06;
+  strands.forEach(st => st.live.geometry.setDrawRange(0, Math.round(st.n * clamp01((bw - st.from) / (st.to - st.from)))));
+  dots.forEach(({d, at}) => { d.visible = bw >= at; });
+  const moving = Math.abs(target - walk) > .002;
+  nodes.forEach(({node, halo, mat}, i) => {
+    const lit = ss(bw, stepAt(i) + .04, stepAt(i) + .07), flash = Math.sin(lit * Math.PI), on = i === hovered ? 1 : 0;
+    built[i] = lit;
+    mat.opacity = .32 + lit * .68; halo.material.opacity = .14 + lit * .66;
+    node.scale.setScalar(1 + flash * .35);
+    mat.emissiveIntensity += (on * .35 + flash * .8 - mat.emissiveIntensity) * .2;
+    halo.scale.setScalar(halo.scale.x + ((on ? 1.25 : 1) * (1 + flash * .3) - halo.scale.x) * .2);
+    // the spider's matching leg turns gold, and twitches while it spins its strand
+    legMats[i].color.copy(legWhite).lerp(legGold, lit * .8); legMats[i].emissive.copy(legGold).multiplyScalar(lit * .16);
+    const spinning = bw > stepAt(i) && bw < stepAt(i) + .07 && moving;
+    const g = legGroups[i]; g.rotation.z += ((spinning ? Math.sin(time * .03 + i) * .16 : 0) - g.rotation.z) * .2;
+  });
+  spider.position.z = Math.sin(time * .002) * .03;
 
-  // the home appears thread by thread as the spider weaves it
-  weave.forEach(w => w.line.geometry.setDrawRange(0, Math.round(w.n * clamp01((b - w.from) / (w.to - w.from)))));
-  silk.material.opacity = .13 * ss(b, .5, .95);
-  lairRim.scale.setScalar(Math.max(.001, ss(b, .72, .92)));
-  lairGlow.material.opacity = .55 * ss(b, .6, 1) + e * .45 + (b > .6 ? Math.sin(time * .002) * .05 : 0);
-  lairLight.intensity = 6 * ss(b, .5, 1) + e * 14;
-  homeHud.style.opacity = ss(walk, .86, .98);
+  // The catch
+  let caught = 0;
+  sparks.forEach((sp, i) => {
+    const p = reduced.matches ? 0 : clamp01((walk - sp.at) / .06);
+    sp.m.visible = p > 0; if (!p) return;
+    const q = 1 - Math.pow(1 - p, 3);
+    sp.m.position.lerpVectors(sp.from, sp.to, q); sp.m.position.z += Math.sin(q * Math.PI) * .6;
+    if (p >= 1) caught++;
+    sp.m.material.opacity = Math.min(1, p * 3) * (p >= 1 ? .8 + Math.sin(time * .004 + i * 1.3) * .2 : 1);
+    sp.m.scale.setScalar(sp.size * (p >= 1 ? 1 : 1.6 - q * .6));
+  });
+  const shine = caught / sparks.length;  // every catch makes the web shine a little more
+  glowLine.opacity = .5 + shine * .3; webLine.opacity = .26 + shine * .16; yellowLine.opacity = .32 + shine * .3;
+
+  // Text: intro, then the leg being spun, then the closing line
+  intro.style.opacity = 1 - ss(walk, .03, .1);
+  intro.style.visibility = walk > .11 ? 'hidden' : 'visible';
+  const stepVis = ss(walk, .07, .12) * (1 - ss(walk, .7, .77));
+  const k = Math.min(7, Math.max(0, Math.floor((walk - STEP0) / STEP)));
+  if (k !== shownStep) showStep(k);
+  stepHud.style.opacity = stepVis; stepHud.style.visibility = stepVis > .01 ? 'visible' : 'hidden';
+  stepBars.forEach((b, j) => b.style.setProperty('--f', clamp01((walk - stepAt(j)) / STEP).toFixed(3)));
+  homeHud.style.opacity = ss(walk, .86, .97);
   homeHud.style.visibility = walk > .84 ? 'visible' : 'hidden';
-  homeHud.style.translate = `${(1 - ss(walk, .86, .98)) * 30}px 0`;
+  homeHud.style.translate = `${(1 - ss(walk, .86, .97)) * 30}px 0`;
+  railDots.forEach((d, j) => { d.classList.toggle('built', built[j] > .5); d.classList.toggle('now', stepVis > .5 && j === k); });
   world.updateMatrixWorld(true);
 
-  const camU = ss(walk, .06, .44);
   const shiftX = isMobile() ? 0 : -baseZ * .2 * Math.min(1, camera.aspect / 1.6);
   const shiftY = isMobile() ? baseZ * .19 : 0;
-  const camX = shiftX + homeX * camU;
-  camera.position.set(camX, shiftY, baseZ); camera.lookAt(camX, shiftY, 0);
-  // slide the chalk smudges with the board so it reads as one surface moving
-  const pxPerUnit = H / (2 * baseZ * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
-  stage.style.setProperty('--pan', `${-homeX * camU * pxPerUnit}px`);
-  nodes.forEach(({mat, halo}, i) => {
-    const on = i === hovered ? 1 : 0;
-    mat.emissiveIntensity += (on * .35 - mat.emissiveIntensity) * .15;
-    halo.scale.setScalar(halo.scale.x + ((on ? 1.25 : 1) - halo.scale.x) * .15);
-  });
+  camera.position.set(shiftX, shiftY, baseZ); camera.lookAt(shiftX, shiftY, 0);
   keyLight.position.x = -4 + Math.sin(time * .0003) * 1.5; fillLight.position.y = -3 + Math.cos(time * .00024) * 1.1;
   renderer.render(scene, camera);
-  const introBox = intro.getBoundingClientRect(), stageBox = canvas.getBoundingClientRect();
+  const hudBox = (walk < .11 ? intro : stepVis > .01 ? stepHud : homeHud).getBoundingClientRect(), stageBox = canvas.getBoundingClientRect();
   anchors.forEach((pos, i) => {
     const p = pos.clone().applyMatrix4(world.matrixWorld).project(camera);
     const x = (p.x * .5 + .5) * W, y = (-p.y * .5 + .5) * H;
     const ax = x + stageBox.left, ay = y + stageBox.top;
-    const overIntro = ax > introBox.left - 24 && ax < introBox.right + 24 && ay > introBox.top - 20 && ay < introBox.bottom + 20;
-    const show = webFade > .6 && !overIntro && p.z > -1 && p.z < 1 && x > 20 && x < W - 20 && y > 80 && y < H - 50;
+    const overIntro = ax > hudBox.left - 24 && ax < hudBox.right + 24 && ay > hudBox.top - 20 && ay < hudBox.bottom + 20;
+    const show = (built[i] > .5 || walk < .06) && !overIntro && p.z > -1 && p.z < 1 && x > 20 && x < W - 20 && y > 80 && y < H - 50;
     labels[i].style.left = x + 'px'; labels[i].style.top = y + 'px'; labels[i].style.display = show ? 'block' : 'none';
+    labels[i].style.opacity = built[i] > .5 ? 1 : .55;
   });
 }
 
