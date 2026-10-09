@@ -294,7 +294,7 @@ main,footer{position:relative;z-index:1}
 .why{display:grid;gap:40px;align-items:center}
 @media(min-width:900px){.why{grid-template-columns:.8fr 1.2fr;gap:72px}}
 .why-art{position:relative;aspect-ratio:4/4.4;max-width:440px;width:100%;border-radius:16px;border:1px solid var(--line2);display:grid;place-items:center;overflow:hidden;background:radial-gradient(60% 50% at 50% 45%,rgba(244,244,239,.07),transparent 70%),linear-gradient(160deg,#2a0b0a,#160808)}
-.why-art svg{width:62%;filter:drop-shadow(0 0 18px rgba(244,244,239,.18))}
+.why-art svg{width:68%;filter:drop-shadow(0 0 18px rgba(244,244,239,.18))}
 .why-art span{position:absolute;bottom:18px;left:20px;color:var(--muted);font-weight:700;font-size:.62rem;letter-spacing:.16em}
 .why h2{margin:16px 0 16px;max-width:22ch}
 .signature{font-family:'Mrs Saint Delafield',cursive;font-size:2.6rem;color:var(--accent-hi);margin-top:18px;line-height:1}
@@ -370,9 +370,9 @@ main,footer{position:relative;z-index:1}
 /* logo: the OCTO spider */
 .brand-mark{width:30px;height:30px}
 .brand-mark svg .sl{fill:none;stroke:var(--ink);stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
-.brand-mark svg .sj{fill:var(--accent-hi);stroke:none}
+.brand-mark svg .sj{fill:#111;stroke:none}
 .brand-mark svg .sb{fill:var(--ink);stroke:none}
-.brand-mark svg .sr{fill:none;stroke:var(--accent-hi);stroke-width:.8}
+.brand-mark svg .sr{fill:none;stroke:#111;stroke-width:.8}
 @media(max-width:760px){.brand-mark{width:27px;height:27px}}
 
 /* chalk smudges: wiped patches and eraser swipes across the whole board */
