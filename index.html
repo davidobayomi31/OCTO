@@ -40,7 +40,7 @@
 </header>
 
 <main id="top">
-  <!-- 1. HERO: the web. As you scroll, the web fades, eight small spiders burst out of the big one, and they all crawl into the lair. -->
+  <!-- 1. HERO: as you scroll, the spider spins its web one leg (one step of OCTO) at a time, then opportunities drift in and get caught. -->
   <section class="hero" id="hero" aria-label="OCTO">
     <div class="stage">
       <canvas id="web-canvas" aria-label="Interactive web of the eight OCTO steps. Select a leg to open it."></canvas>
@@ -54,10 +54,18 @@
             <a href="#legs" class="btn btn-line">See the 8 steps <span aria-hidden="true">↓</span></a>
           </div>
         </div>
-        <div class="home-hud" id="home-hud" aria-hidden="true">
-          <div class="kicker">Home base</div>
+        <div class="step-hud" id="step-hud" aria-live="polite">
+          <div class="kicker" id="step-kick">Leg 01 / 08 · The game</div>
+          <h2 id="step-title">See the game</h2>
+          <p id="step-text"></p>
+          <div class="step-bars" id="step-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <button class="step-open" id="step-open" type="button">What you get in this leg <span aria-hidden="true">→</span></button>
+        </div>
+        <div class="home-hud" id="home-hud">
+          <div class="kicker">Eight legs. One web.</div>
           <h2>Build a life<br><em>that's yours.</em></h2>
           <p>A spider doesn't wait for food. It builds a web and lets the world come to it. We'll teach you to build yours.</p>
+          <a href="#founding" class="btn btn-solid" data-apply>Apply for the Founding 10</a>
         </div>
         <nav class="chapter-rail" aria-label="Open a step" id="chapter-rail"></nav>
         <div class="web-labels" id="web-labels"></div>

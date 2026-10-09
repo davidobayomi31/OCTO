@@ -17,7 +17,7 @@ Then open http://localhost:8731/ in your browser.
 - `index.html` holds the page structure and copy.
 - `style.css` holds the chalkboard theme and the laptop and phone layouts.
 - `app.js` has two parts:
-  - the 3D web, the big spider, the eight small spiders and the lair
+  - the 3D web the spider spins leg by leg as you scroll, and the gold sparks it catches at the end
   - the panels and the scroll effects
 - `smudges.svg` is the chalk-smudge texture for the board.
 
