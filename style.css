@@ -506,3 +506,7 @@ h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight
 .after-list span{color:var(--ink);font-weight:600}
 .after-note{margin-top:auto;color:var(--muted);font-size:.84rem}
 @media(max-width:760px){.after-list li{grid-template-columns:1fr;gap:2px}}
+
+/* top bar shortcuts to sections (laptop only; phones have the sticky Apply bar) */
+html{scroll-padding-top:84px}
+@media(max-width:760px){.top-link{display:none}}
