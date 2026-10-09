@@ -50,7 +50,6 @@ document.querySelectorAll('[data-apply]').forEach(a => {
 const spotsLeft = Math.max(0, 10 - SPOTS_TAKEN);
 $('seat-dots').innerHTML = Array.from({length:10}, (_, i) => `<i class="${i < SPOTS_TAKEN ? 'taken' : ''}"></i>`).join('');
 $('seat-text').textContent = spotsLeft ? `${spotsLeft} of 10 spots left` : 'Founding 10 is full';
-$('mbar-seats').textContent = spotsLeft ? `$1,000 · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left` : 'Founding 10 is full';
 if (LINKS.vsl) {
   const yt = LINKS.vsl.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
   $('vsl').innerHTML = yt ? `<iframe src="https://www.youtube-nocookie.com/embed/${yt[1]}" title="OCTO introduction" allow="encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>` : `<video src="${LINKS.vsl}" controls playsinline preload="metadata"></video>`;
@@ -378,8 +377,8 @@ function render(time = 0){
 /* ---------- The tiny chalk spider crawling across the board below the hero ---------- */
 const crawl = $('crawl'), crawler = $('crawler'), trail = $('trail-path'), crawlSvg = $('crawl-trail');
 let y0 = 0, yEnd = 0, docW = 0, amp = 0, wave = 380, walkTimer = 0;
-// Laptop: a wide S-curve across the board. Phone: a thread down the right margin, so it never sits on text.
-const pathX = y => isMobile() ? docW - 7 + 2 * Math.sin((y - y0) / 160) : docW / 2 + amp * Math.sin((y - y0) / wave);
+// A wide S-curve across the board, on laptop and phone alike (tighter turns on a phone's narrow screen).
+const pathX = y => docW / 2 + amp * Math.sin((y - y0) / wave);
 function layoutCrawl(){
   const footer = document.querySelector('footer');
   docW = document.documentElement.clientWidth;
@@ -387,12 +386,12 @@ function layoutCrawl(){
   crawl.style.height = docH + 'px'; crawlSvg.setAttribute('viewBox', `0 0 ${docW} ${docH}`);
   y0 = hero.offsetTop + hero.offsetHeight + 40;
   yEnd = footer.offsetTop - 60;
-  amp = Math.min(docW * .4, 560); wave = 420;
+  amp = isMobile() ? docW * .36 : Math.min(docW * .4, 560); wave = isMobile() ? 300 : 420;
   updateCrawl();
 }
 function updateCrawl(){
   const y = Math.min(yEnd, Math.max(y0, scrollY + innerHeight * .62));
-  const x = pathX(y), slope = isMobile() ? 2 / 160 * Math.cos((y - y0) / 160) : amp / wave * Math.cos((y - y0) / wave), half = crawler.offsetWidth / 2;
+  const x = pathX(y), slope = amp / wave * Math.cos((y - y0) / wave), half = crawler.offsetWidth / 2;
   const deg = Math.atan2(1, slope) * 180 / Math.PI + 90;
   crawler.style.transform = `translate(${x - half}px, ${y - half}px) rotate(${deg}deg)`;
   crawler.classList.toggle('on', scrollY + innerHeight * .62 > y0 - 20);
@@ -403,10 +402,8 @@ function updateCrawl(){
 function onScroll(){
   updateCrawl();
   if (!reduced.matches) { crawler.classList.add('walking'); clearTimeout(walkTimer); walkTimer = setTimeout(() => crawler.classList.remove('walking'), 180); }
-  const hb = hero.getBoundingClientRect().bottom, fr = $('founding').getBoundingClientRect(), fc = $('final').getBoundingClientRect();
+  const hb = hero.getBoundingClientRect().bottom;
   $('topbar').classList.toggle('solid', hb < 80);
-  const over = r => r.top < innerHeight && r.bottom > 0;
-  $('mbar').classList.toggle('show', hb < innerHeight * .5 && !over(fr) && !over(fc));
   $('scroll-cue').classList.toggle('hidden', scrollY > 40);
 }
 addEventListener('scroll', onScroll, {passive:true});
@@ -415,5 +412,27 @@ addEventListener('load', layoutCrawl);
 resize(); onScroll(); requestAnimationFrame(render);
 
 /* ---------- Reveal on scroll ---------- */
-const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {rootMargin:'0px 0px 12% 0px'});
-document.querySelectorAll('.rv').forEach(n => io.observe(n));
+// Laptop: each block fades up once. Phone: like consulting.com's mobile page, each block fades and rises in as it
+// arrives and fades back out as it leaves the top, so moving from one section to the next feels like a page turn.
+if (isMobile() && !reduced.matches) {
+  const flowEls = [...document.querySelectorAll('.rv, .legs-grid > *')];
+  flowEls.forEach(n => n.classList.add('flow'));
+  const flow = () => {
+    const vh = innerHeight;
+    for (const el of flowEls) {
+      const r = el.getBoundingClientRect();
+      if (r.bottom < -60 || r.top > vh + 60) continue;
+      const enter = clamp01((vh - r.top) / (vh * .3)), leave = clamp01((r.bottom - 70) / (vh * .25)); // 70px: under the top bar
+      const v = Math.min(enter, leave), e = v * v * (3 - 2 * v);
+      el.style.opacity = e.toFixed(3);
+      el.style.transform = enter === 1 && leave === 1 ? '' : `translateY(${((1 - enter) * 28 - (1 - leave) * 14).toFixed(1)}px)`;
+    }
+  };
+  let flowQueued = false;
+  addEventListener('scroll', () => { if (!flowQueued) { flowQueued = true; requestAnimationFrame(() => { flowQueued = false; flow(); }); } }, {passive:true});
+  addEventListener('resize', flow, {passive:true});
+  flow();
+} else {
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {rootMargin:'0px 0px 12% 0px'});
+  document.querySelectorAll('.rv').forEach(n => io.observe(n));
+}
