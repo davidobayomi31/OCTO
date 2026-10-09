@@ -158,45 +158,81 @@ makeSphere(.47, shellMat, V(0, -.24, spiderZ + .17), [.74, 1.08, .33], spider);
 const rim = new THREE.Mesh(new THREE.TorusGeometry(.36, .018, 8, 56), new THREE.MeshStandardMaterial({color:0xf2dc7d, metalness:.1, roughness:.4})); rim.position.set(0, -.24, spiderZ + .28); spider.add(rim);
 const markMat = new THREE.MeshBasicMaterial({color:0x2a3530});
 for (let m = 0; m < 5; m++) makeSphere(.025, markMat, V((m - 2) * .105, -.28, spiderZ + .49), [1,1,1], spider);
-// The spider's home: a silk funnel web. A sheet of threads around a mouth that curves
-// away into the board, lit warm from deep inside. The board is empty when the spider arrives;
-// it weaves this in one scroll (moorings, then the threads down the tunnel, then the rings),
-// and goes inside on the next.
+// The spider's home, fit for a queen: a silk funnel (the way in) set in a gold-threaded rose-window web,
+// crowned with eight gold spires (one per leg), hung with silk drapes and studded with dew-drop jewels.
+// The board is empty when the spider arrives; it weaves all of this in one scroll and goes inside on the next.
 const lair = new THREE.Group(); world.add(lair);
 const weave = [];  // {line, n, from, to}: drawn along its length between build progress `from` and `to`
 const weaveLine = (pts, mat, from, to) => { const l = makeLine(pts, mat, lair); l.geometry.setDrawRange(0, 0); weave.push({line:l, n:pts.length, from, to}); };
 const lairLine = new THREE.LineBasicMaterial({color:0xe9eee9, transparent:true, opacity:.5, depthWrite:false});
-const lairFaint = new THREE.LineBasicMaterial({color:0xc9d3cd, transparent:true, opacity:.22, depthWrite:false});
-const lairGold = new THREE.LineBasicMaterial({color:0xf2dc7d, transparent:true, opacity:.55, depthWrite:false});
-// funnel profile: [radius, depth]; flares at the mouth, then a long tunnel into the board
+const lairFaint = new THREE.LineBasicMaterial({color:0xc9d3cd, transparent:true, opacity:.2, depthWrite:false});
+const lairGold = new THREE.LineBasicMaterial({color:0xf2dc7d, transparent:true, opacity:.6, depthWrite:false});
+const lairGoldSoft = new THREE.LineBasicMaterial({color:0xf2dc7d, transparent:true, opacity:.42, depthWrite:false});
+const roseLine = new THREE.LineBasicMaterial({color:0xdfe6e1, transparent:true, opacity:.34, depthWrite:false});
+
+// 1. mooring threads that anchor everything to the board, outside in
+for (let t = 0; t < 10; t++) {
+  const a = t / 10 * Math.PI * 2 + .3, r0 = 4.5, r1 = 6.3 + (t % 3) * .8, pts = [];
+  for (let s2 = 0; s2 <= 12; s2++) { const u = s2 / 12, r = r1 + (r0 - r1) * u; pts.push(V(Math.cos(a + .05 * (1 - u)) * r, Math.sin(a + .05 * (1 - u)) * r, -.25 + .1 * (1 - u))); }
+  weaveLine(pts, lairFaint, t * .014, .1 + t * .014);
+}
+// 2. the rose window: a grand scalloped orb web behind the entrance, every third thread in gold
+const ROSE_Z = -.3;
+for (let i = 0; i < 24; i++) {
+  const a = i / 24 * Math.PI * 2, pts = [];
+  for (let s2 = 0; s2 <= 10; s2++) { const r = .9 + s2 / 10 * 3.65; pts.push(V(Math.cos(a) * r, Math.sin(a) * r, ROSE_Z)); }
+  weaveLine(pts, i % 3 === 0 ? lairGoldSoft : roseLine, .06 + i * .006, .17 + i * .006);
+}
+for (let k = 0; k < 9; k++) {
+  const R = 1.4 + k * .38, pts = [];
+  for (let s2 = 0; s2 <= 192; s2++) { const a = s2 / 192 * Math.PI * 2, r = R + .11 * Math.sin(a * 24) * (k % 2 ? 1 : -1); pts.push(V(Math.cos(a) * r, Math.sin(a) * r, ROSE_Z)); }
+  weaveLine(pts, k % 3 === 1 ? lairGoldSoft : roseLine, .18 + k * .024, .26 + k * .024);
+}
+// 3. the funnel: the way in, curving away deep into the board
 const profile = [[3.1,.05],[2.3,0],[1.6,-.18],[1.08,-.5],[.78,-1],[.62,-1.7],[.55,-2.7],[.5,-4],[.47,-5.4]];
 const funnelAt = (k, a) => { const [r, z] = profile[k]; return V(Math.cos(a) * r, Math.sin(a) * r, z); };
-// threads running down into the tunnel
 for (let t = 0; t < 22; t++) {
   const a = t / 22 * Math.PI * 2 + Math.sin(t * 3.1) * .04, pts = [];
   for (let k = 0; k < profile.length; k++) pts.push(funnelAt(k, a + k * .045));
-  weaveLine(new THREE.CatmullRomCurve3(pts).getPoints(48), t % 11 === 0 ? lairGold : lairLine, .12 + t * .012, .3 + t * .012);
+  weaveLine(new THREE.CatmullRomCurve3(pts).getPoints(48), t % 11 === 0 ? lairGold : lairLine, .3 + t * .01, .44 + t * .01);
 }
-// rings around the funnel, denser near the mouth
-for (let k = 0; k < 26; k++) {
-  const u = Math.pow(k / 25, 1.7) * (profile.length - 1), i = Math.min(profile.length - 2, Math.floor(u)), f = u - i;
+for (let k = 0; k < 20; k++) {
+  const u = Math.pow(k / 19, 1.7) * (profile.length - 1), i = Math.min(profile.length - 2, Math.floor(u)), f = u - i;
   const r = profile[i][0] + (profile[i + 1][0] - profile[i][0]) * f, z = profile[i][1] + (profile[i + 1][1] - profile[i][1]) * f, pts = [];
   for (let s2 = 0; s2 <= 96; s2++) { const a = s2 / 96 * Math.PI * 2; pts.push(V(Math.cos(a) * (r + Math.sin(a * 7 + k) * .03 * r), Math.sin(a) * (r + Math.sin(a * 7 + k) * .03 * r), z)); }
-  weaveLine(pts, k === 7 ? lairGold : (k > 2 && k < 10 ? lairLine : lairFaint), .3 + k * .02, .38 + k * .02);
+  weaveLine(pts, k === 5 ? lairGold : (k > 1 && k < 9 ? lairLine : lairFaint), .42 + k * .02, .48 + k * .02);
 }
 // the silk surface itself: a faint glossy shell
 const silk = new THREE.Mesh(new THREE.LatheGeometry(profile.map(([r, z]) => new THREE.Vector2(r, z)), 72),
   new THREE.MeshPhysicalMaterial({color:0xf4f4ef, transparent:true, opacity:0, roughness:.35, clearcoat:1, clearcoatRoughness:.15, side:THREE.DoubleSide, depthWrite:false}));
 silk.rotation.x = Math.PI / 2; lair.add(silk);
-// mooring threads that tie the sheet to the board
-for (let t = 0; t < 9; t++) {
-  const a = t / 9 * Math.PI * 2 + .3, r0 = 3.1, r1 = 5.2 + (t % 3) * .9, pts = [];
-  for (let s2 = 0; s2 <= 12; s2++) { const u = s2 / 12, r = r1 + (r0 - r1) * u; pts.push(V(Math.cos(a + .05 * (1 - u)) * r, Math.sin(a + .05 * (1 - u)) * r, .1 - .05 * u)); }
-  weaveLine(pts, lairFaint, t * .02, .12 + t * .02);  // anchored to the board first, outside in
+// 4. silk drapes across the top, like a canopy over a throne
+for (let j = 0; j < 4; j++) {
+  const a0 = Math.PI * (.14 + j * .18), a1 = a0 + .62, A = V(Math.cos(a0) * 4.3, Math.sin(a0) * 4.3, -.2), B = V(Math.cos(a1) * 4.3, Math.sin(a1) * 4.3, -.2), pts = [];
+  for (let s2 = 0; s2 <= 24; s2++) { const u = s2 / 24; pts.push(A.clone().lerp(B, u).add(V(0, -Math.sin(u * Math.PI) * (.55 + j % 2 * .25), .25 * Math.sin(u * Math.PI)))); }
+  weaveLine(pts, j % 2 ? lairGoldSoft : lairLine, .52 + j * .04, .64 + j * .04);
 }
-// a gold rim at the mouth, matching the spider's shell
-const lairRim = new THREE.Mesh(new THREE.TorusGeometry(1.08, .028, 10, 96), new THREE.MeshStandardMaterial({color:0xf2dc7d, metalness:.2, roughness:.35}));
-lairRim.position.z = -.5; lair.add(lairRim);
+// 5. the crown: a double gold rim and eight gold spires around the entrance, one for each leg
+const goldMat = new THREE.MeshStandardMaterial({color:0xf2dc7d, metalness:.55, roughness:.28, emissive:0x3a2c08});
+const lairRim = new THREE.Mesh(new THREE.TorusGeometry(1.08, .032, 10, 96), goldMat); lairRim.position.z = -.5; lair.add(lairRim);
+const lairRim2 = new THREE.Mesh(new THREE.TorusGeometry(1.24, .016, 8, 96), goldMat); lairRim2.position.z = -.44; lair.add(lairRim2);
+const spires = legAngles.map((a, i) => {
+  const g = new THREE.Group(), h = i % 2 ? .5 : .85;
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(.07, h, 14), goldMat); cone.rotation.x = Math.PI / 2; cone.position.z = h / 2; g.add(cone);
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(.07, 16, 12), goldMat); orb.position.z = h + .05; g.add(orb);
+  g.position.set(Math.cos(a) * 1.16, Math.sin(a) * 1.16, -.46);
+  g.quaternion.setFromUnitVectors(V(0, 0, 1), V(Math.cos(a) * .18, Math.sin(a) * .18, 1).normalize()); // rise out of the entrance, leaning slightly outward
+  g.scale.setScalar(.001); lair.add(g);
+  return {g, at:.78 + i * .016};
+});
+// 6. dew-drop jewels on the rose window, glinting once the home is finished
+const jewelWhite = new THREE.MeshBasicMaterial({color:0xfff8e6}), jewelGold = new THREE.MeshBasicMaterial({color:0xf6e39a});
+const jewels = [];
+for (const k of [1, 3, 5, 7]) for (let i = 0; i < 24; i += 2) {
+  const a = i / 24 * Math.PI * 2, r = 1.4 + k * .38;
+  const m = makeSphere(.026 + (i % 3) * .007, k % 4 === 1 ? jewelGold : jewelWhite, V(Math.cos(a) * r, Math.sin(a) * r, ROSE_Z + .02), [1,1,1], lair);
+  m.visible = false; jewels.push({m, at:.34 + k * .05 + i * .002, ph:i * 1.7 + k * 2.3});
+}
 // warm light from deep inside
 const glowCanvas = document.createElement('canvas'); glowCanvas.width = glowCanvas.height = 128;
 { const g = glowCanvas.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
@@ -205,6 +241,8 @@ const glowCanvas = document.createElement('canvas'); glowCanvas.width = glowCanv
 const lairGlow = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(glowCanvas), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, opacity:.55}));
 lairGlow.position.z = -4.6; lairGlow.scale.setScalar(2.6); lair.add(lairGlow);
 const lairLight = new THREE.PointLight(0xf2dc7d, 6, 9); lairLight.position.z = -1.2; lair.add(lairLight);
+const lairHalo = new THREE.Sprite(new THREE.SpriteMaterial({map:lairGlow.material.map, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, opacity:0}));
+lairHalo.position.z = ROSE_Z - .2; lairHalo.scale.setScalar(10); lair.add(lairHalo);
 // tilt the funnel so you look into it at an angle and the tunnel reads as going deep into the board
 lair.rotation.set(.32, -.62, 0);
 const lairAxis = V(0, 0, -1).applyEuler(lair.rotation);
@@ -304,7 +342,7 @@ function resize(){
   baseZ = THREE.MathUtils.clamp(4.8 / Math.tan(Math.min(vHalf, hHalf)), 10.4, 19);
   // The lair sits off to the right of the board; the camera slides over to it.
   homeX = isMobile() ? 10 : 13;
-  lair.position.set(homeX, 0, 0); lair.scale.setScalar(isMobile() ? 1.05 : 1.2);
+  lair.position.set(homeX, 0, 0); lair.scale.setScalar(isMobile() ? .86 : 1.05);
   layoutCrawl();
 }
 addEventListener('resize', resize, {passive:true});
@@ -351,8 +389,11 @@ function render(time = 0){
 
   // the home appears thread by thread as the spider weaves it
   weave.forEach(w => w.line.geometry.setDrawRange(0, Math.round(w.n * clamp01((b - w.from) / (w.to - w.from)))));
-  silk.material.opacity = .13 * ss(b, .5, .95);
-  lairRim.scale.setScalar(Math.max(.001, ss(b, .72, .92)));
+  silk.material.opacity = .13 * ss(b, .55, .95);
+  lairRim.scale.setScalar(Math.max(.001, ss(b, .7, .86))); lairRim2.scale.setScalar(Math.max(.001, ss(b, .74, .9)));
+  spires.forEach(sp => { const k = ss(b, sp.at, sp.at + .08); sp.g.scale.setScalar(Math.max(.001, k * (1 + Math.sin(k * Math.PI) * .25))); });
+  jewels.forEach(j => { j.m.visible = b >= j.at; if (j.m.visible) j.m.scale.setScalar(1 + Math.pow(Math.max(0, Math.sin(time * .0025 + j.ph)), 6) * .7); });
+  lairHalo.material.opacity = .16 * ss(b, .7, 1) + e * .08;
   lairGlow.material.opacity = .55 * ss(b, .6, 1) + e * .45 + (b > .6 ? Math.sin(time * .002) * .05 : 0);
   lairLight.intensity = 6 * ss(b, .5, 1) + e * 14;
   homeHud.style.opacity = ss(walk, .86, .98);

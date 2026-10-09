@@ -413,16 +413,6 @@ h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight
 /* Reveal: shorter and subtler, so nothing sits blank during a fast flick */
 .rv{transform:translateY(14px);transition-duration:.6s}
 
-/* Why we built OCTO: the spider hanging on its web, not a generic icon */
-.why-art svg{width:auto;filter:none}
-.why-art>svg.why-web{width:74%;height:auto;filter:drop-shadow(0 0 18px rgba(244,244,239,.14))}
-.why-art .ww{fill:none;stroke:rgba(244,244,239,.2);stroke-width:1}
-.why-art .silk{stroke:rgba(244,244,239,.55);stroke-width:1}
-.why-art .why-spider{width:88px;height:88px;overflow:visible}
-.why-art .sl{fill:none;stroke:var(--ink);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.why-art .sj{fill:var(--accent-hi)}
-.why-art .sb{fill:var(--ink)}
-.why-art .sr{fill:none;stroke:var(--accent-hi);stroke-width:.8}
 
 /* How to join: a thread timeline (horizontal on laptop, vertical on phone) */
 .join-steps{gap:0}
@@ -451,7 +441,7 @@ h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight
   /* why: compact art banner instead of a full-screen square */
   .why{gap:28px}
   .why-art{aspect-ratio:auto;height:210px;max-width:none}
-  .why-art>svg.why-web{width:auto;height:100%}
+  .why-art svg{width:auto;height:62%}
   .signature{font-size:2.2rem}
 
   /* the eight legs: one tidy list on a silk thread; tap a leg for the full sheet */
