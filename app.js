@@ -71,21 +71,28 @@ wall.addEventListener('pointermove', e => {
   const r = wall.getBoundingClientRect();
   wallTX = -((e.clientX - r.left) / r.width - .5) * 28; // small sideways drift, so the side columns never get cut off
   wallTY = -((e.clientY - r.top) / r.height - .5) * 50;
+  kickWall();
 });
-wall.addEventListener('pointerleave', () => { wallTX = 0; wallTY = 0; });
-(function wallLoop(){
+wall.addEventListener('pointerleave', () => { wallTX = 0; wallTY = 0; kickWall(); });
+// The drift only reacts to a mouse, so the loop runs only while it is settling (never on a phone).
+let wallRaf = 0;
+function wallLoop(){
   wallX += (wallTX - wallX) * .08; wallY += (wallTY - wallY) * .08;
   wallTrack.style.transform = `translate3d(${wallX.toFixed(2)}px, ${wallY.toFixed(2)}px, 0)`;
-  requestAnimationFrame(wallLoop);
-})();
+  wallRaf = Math.abs(wallTX - wallX) + Math.abs(wallTY - wallY) > .05 ? requestAnimationFrame(wallLoop) : 0;
+}
+function kickWall(){ if (!wallRaf) wallRaf = requestAnimationFrame(wallLoop); }
 
 /* ---------- Testimonials: placeholders until the Founding 10 have results ---------- */
 $('testis').innerHTML = Array.from({length:4}, (_, i) => `<div class="testi rv"><div class="testi-top"><div class="testi-av">${pad2(i + 1)}</div><div><b>Founding client ${pad2(i + 1)}</b><small>Joining October 2026</small></div></div><p>Their story will be shared here once they’ve been through the program.</p></div>`).join('');
 
 /* ---------- 3D web on the blackboard (adapted from the team's OCTO template) ---------- */
 const canvas = $('web-canvas'), stage = canvas.parentElement, intro = $('intro-hud'), hero = $('hero');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile() ? 1.5 : 2));
+// Phones get a lighter scene: native-ish resolution without antialiasing, plain (non-clearcoat) materials, less dust.
+const LITE = isMobile();
+const renderer = new THREE.WebGLRenderer({canvas, antialias:!LITE, alpha:true, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio, LITE ? 1.25 : 2));
+const glossy = o => { if (!LITE) return new THREE.MeshPhysicalMaterial(o); const {clearcoat, clearcoatRoughness, ...rest} = o; return new THREE.MeshStandardMaterial(rest); };
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x0c0707, .008);
 const camera = new THREE.PerspectiveCamera(48, 1, .1, 120); camera.position.set(0, 0, 18);
@@ -98,9 +105,9 @@ const web = new THREE.Group(); world.add(web); // the 8-leg web: spun strand by 
 const webLine = new THREE.LineBasicMaterial({color:0xd6cdcc, transparent:true, opacity:.26, depthWrite:false});
 const glowLine = new THREE.LineBasicMaterial({color:0xf4f4ef, transparent:true, opacity:.5, depthWrite:false});
 const yellowLine = new THREE.LineBasicMaterial({color:0xc8463a, transparent:true, opacity:.32, depthWrite:false});
-const legMaterial = new THREE.MeshPhysicalMaterial({color:0xf1f1ea, metalness:.02, roughness:.62, clearcoat:.75, clearcoatRoughness:.16});
-const jointMaterial = new THREE.MeshPhysicalMaterial({color:0x111111, metalness:.02, roughness:.5, clearcoat:.9, clearcoatRoughness:.12});
-const coreMaterial = new THREE.MeshPhysicalMaterial({color:0xf3f3ec, metalness:.02, roughness:.55, clearcoat:.9, clearcoatRoughness:.12, emissive:0x0a0a0a});
+const legMaterial = glossy({color:0xf1f1ea, metalness:.02, roughness:.62, clearcoat:.75, clearcoatRoughness:.16});
+const jointMaterial = glossy({color:0x111111, metalness:.02, roughness:.5, clearcoat:.9, clearcoatRoughness:.12});
+const coreMaterial = glossy({color:0xf3f3ec, metalness:.02, roughness:.55, clearcoat:.9, clearcoatRoughness:.12, emissive:0x0a0a0a});
 const hitMaterial = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0, depthWrite:false});
 const hitNodes = [], anchors = [], nodes = [];
 const makeLine = (pts, mat, parent = web) => { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat); parent.add(l); return l; };
@@ -149,7 +156,7 @@ for (let ring = 1; ring <= 6; ring++) {
 const built = new Array(8).fill(0);
 for (let i = 0; i < 8; i++) {
   const a = legAngles[i], tip = pointOn(3.38, a, .18);
-  const mat = new THREE.MeshPhysicalMaterial({color:i === 0 ? 0xf4f4ef : 0xe5dfdf, emissive:0xc8463a, emissiveIntensity:0, metalness:.04, roughness:.48, clearcoat:1, clearcoatRoughness:.1, transparent:true});
+  const mat = glossy({color:i === 0 ? 0xf4f4ef : 0xe5dfdf, emissive:0xc8463a, emissiveIntensity:0, metalness:.04, roughness:.48, clearcoat:1, clearcoatRoughness:.1, transparent:true});
   const node = makeSphere(.24, mat, tip); node.userData = {index:i}; hitNodes.push(node);
   const halo = new THREE.Mesh(new THREE.TorusGeometry(.37, .014, 8, 48), new THREE.MeshBasicMaterial({color:0xc8463a, transparent:true, opacity:.8})); halo.position.copy(tip); web.add(halo);
   nodes.push({node, halo, mat});
@@ -171,7 +178,7 @@ for (let leg = 0; leg < 8; leg++) {
   const lm = legMaterial.clone(); legMats.push(lm);
   makeTube(pts, .058, lm, g); makeSphere(.092, jointMaterial, pts[1], [1,1,1], g); makeSphere(.067, jointMaterial, pts[2], [1,1,1], g);
 }
-const shellMat = new THREE.MeshPhysicalMaterial({color:0xf6f6f0, metalness:.02, roughness:.45, clearcoat:1, clearcoatRoughness:.08, emissive:0x0a0a0a});
+const shellMat = glossy({color:0xf6f6f0, metalness:.02, roughness:.45, clearcoat:1, clearcoatRoughness:.08, emissive:0x0a0a0a});
 makeSphere(.47, shellMat, V(0, -.24, spiderZ + .17), [.74, 1.08, .33], spider);
 const rim = new THREE.Mesh(new THREE.TorusGeometry(.36, .018, 8, 56), new THREE.MeshStandardMaterial({color:0x111111, metalness:.1, roughness:.4})); rim.position.set(0, -.24, spiderZ + .28); spider.add(rim);
 // "OCTO" written across its back, inside the ring
@@ -199,7 +206,7 @@ const sparks = Array.from({length:28}, (_, i) => {
   return {m, from:V(Math.cos(dir) * r0, Math.sin(dir) * r0, 1.5 + (i % 3)), to:pointOn(.72 + ring * .62, a, .06),
     at:.78 + i / 28 * .12, size:.34 + (i % 5) * .06};
 });
-const dust = []; for (let i = 0; i < 200; i++) dust.push(Math.sin(i * 12.17) * 11, Math.cos(i * 4.19) * 7, Math.cos(i * 1.71) * 29 - 10);
+const dust = []; for (let i = 0; i < (LITE ? 80 : 200); i++) dust.push(Math.sin(i * 12.17) * 11, Math.cos(i * 4.19) * 7, Math.cos(i * 1.71) * 29 - 10);
 const dustGeo = new THREE.BufferGeometry(); dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dust, 3));
 scene.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({color:0xf4f4ef, size:.025, transparent:true, opacity:.5, depthWrite:false})));
 
@@ -300,9 +307,12 @@ addEventListener('resize', resize, {passive:true});
 let heroVisible = true;
 new IntersectionObserver(([e]) => { heroVisible = e.isIntersecting; }, {threshold:0}).observe(stage);
 function heroProgress(){ const r = hero.getBoundingClientRect(); return clamp01(-r.top / Math.max(1, r.height - innerHeight)); }
+let lastDraw = 0;
 function render(time = 0){
   requestAnimationFrame(render);
   if (!heroVisible) return;
+  if (LITE && time - lastDraw < 80 && Math.abs(heroProgress() - walk) < .002 && Math.abs(tOrbitX - orbitX) + Math.abs(tOrbitY - orbitY) < .002) return;
+  lastDraw = time;
   orbitX += (tOrbitX - orbitX) * .08; orbitY += (tOrbitY - orbitY) * .08;
   world.rotation.z = orbitY * .12; world.rotation.x = .1 + orbitX * .12; world.rotation.y = orbitY * .12;
 
@@ -362,6 +372,7 @@ function render(time = 0){
   camera.position.set(shiftX, shiftY, baseZ); camera.lookAt(shiftX, shiftY, 0);
   keyLight.position.x = -4 + Math.sin(time * .0003) * 1.5; fillLight.position.y = -3 + Math.cos(time * .00024) * 1.1;
   renderer.render(scene, camera);
+  if (LITE) return; // leg labels are hidden on phones
   const hudBox = (walk < .11 ? intro : stepVis > .01 ? stepHud : homeHud).getBoundingClientRect(), stageBox = canvas.getBoundingClientRect();
   anchors.forEach((pos, i) => {
     const p = pos.clone().applyMatrix4(world.matrixWorld).project(camera);
