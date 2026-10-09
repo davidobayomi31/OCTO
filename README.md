@@ -25,7 +25,7 @@ Then open http://localhost:8731/ in your browser.
 
 The settings are at the top of `app.js`:
 
-- `LINKS.apply` takes the Typeform application link.
+- `LINKS.apply` takes the Tally application link (it redirects to Calendly on submit).
 - `LINKS.vsl` takes an optional pitch video, either a YouTube link or an .mp4 file.
 - `SPOTS_TAKEN` is the number of Founding 10 spots already filled.
 

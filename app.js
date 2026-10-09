@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 /* ===== Settings: edit these ===== */
 const LINKS = {
-  apply: '', // Typeform application link, e.g. 'https://form.typeform.com/to/XXXX'
+  apply: 'https://tally.so/r/WOGRdR', // Tally application form (redirects to Calendly on submit)
   vsl: ''    // Pitch video: a YouTube link or an .mp4 URL. Leave empty to hide.
 };
 const SPOTS_TAKEN = 0; // Founding clients signed so far (0–10)
@@ -82,9 +82,6 @@ function wallLoop(){
   wallRaf = Math.abs(wallTX - wallX) + Math.abs(wallTY - wallY) > .05 ? requestAnimationFrame(wallLoop) : 0;
 }
 function kickWall(){ if (!wallRaf) wallRaf = requestAnimationFrame(wallLoop); }
-
-/* ---------- Testimonials: placeholders until the Founding 10 have results ---------- */
-$('testis').innerHTML = Array.from({length:4}, (_, i) => `<div class="testi rv"><div class="testi-top"><div class="testi-av">${pad2(i + 1)}</div><div><b>Founding client ${pad2(i + 1)}</b><small>Joining October 2026</small></div></div><p>Their story will be shared here once they’ve been through the program.</p></div>`).join('');
 
 /* ---------- 3D web on the blackboard (adapted from the team's OCTO template) ---------- */
 const canvas = $('web-canvas'), stage = canvas.parentElement, intro = $('intro-hud'), hero = $('hero');
